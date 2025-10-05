@@ -5,6 +5,7 @@ import '../../core/localization/localization_service.dart';
 import '../../core/widgets/ui_states.dart';
 import '../../core/router/app_router.dart';
 import '../../core/config/app_config.dart';
+import '../products/product_list_screen.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
@@ -16,6 +17,15 @@ class HomeScreen extends ConsumerStatefulWidget {
 class _HomeScreenState extends ConsumerState<HomeScreen> {
   final _searchController = TextEditingController();
   bool _isLoading = false;
+
+  final List<IconData> _categoryIcons = [
+    Icons.man,
+    Icons.woman,
+    Icons.child_care,
+    Icons.hiking,
+    Icons.watch,
+    Icons.fitness_center,
+  ];
 
   @override
   void dispose() {
@@ -103,21 +113,24 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         children: [
           _buildBannerCard(
             context,
-            'عروض خاصة',
+            'تشكيلة الخريف',
+            'أحدث صيحات الموضة',
+            AppColors.primaryGradientStart,
+            AppColors.primaryGradientEnd,
+          ),
+          _buildBannerCard(
+            context,
+            'عروض نهاية الموسم',
             'خصم يصل إلى 50%',
-            Colors.orange,
+            AppColors.sale,
+            AppColors.sale.withOpacity(0.8),
           ),
           _buildBannerCard(
             context,
-            'توصيل مجاني',
-            'لجميع الطلبات',
-            Colors.green,
-          ),
-          _buildBannerCard(
-            context,
-            'منتجات جديدة',
-            'اكتشف أحدث المنتجات',
-            Colors.blue,
+            'أزياء رمضان',
+            'مجموعة حصرية',
+            AppColors.primary,
+            AppColors.primaryLight,
           ),
         ],
       ),
@@ -128,36 +141,81 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     BuildContext context,
     String title,
     String subtitle,
-    Color color,
+    Color startColor,
+    Color endColor,
   ) {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 8),
       decoration: BoxDecoration(
-        color: color,
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(
-              title,
-              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              subtitle,
-              style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                color: Colors.white.withValues(alpha: 0.9),
-              ),
-            ),
-          ],
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [startColor, endColor],
         ),
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: startColor.withOpacity(0.2),
+            blurRadius: 8,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Stack(
+        children: [
+          Positioned(
+            right: -20,
+            bottom: -20,
+            child: Icon(
+              Icons.shopping_bag_outlined,
+              size: 140,
+              color: Colors.white.withOpacity(0.2),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  title,
+                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 0.5,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  subtitle,
+                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                    color: Colors.white.withOpacity(0.9),
+                    letterSpacing: 0.5,
+                  ),
+                ),
+                const SizedBox(height: 16),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 8,
+                  ),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.2),
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Text(
+                    'تسوق الآن',
+                    style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -193,14 +251,15 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             itemCount: 6,
             itemBuilder: (context, index) {
               final categories = [
-                'إلكترونيات',
-                'ملابس',
-                'منزل',
+                'رجالي',
+                'نسائي',
+                'أطفال',
+                'أحذية',
+                'إكسسوارات',
                 'رياضة',
-                'كتب',
-                'ألعاب',
               ];
-              return _buildCategoryCard(context, categories[index]);
+
+              return _buildCategoryCard(context, categories[index], index);
             },
           ),
         ),
@@ -208,7 +267,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     );
   }
 
-  Widget _buildCategoryCard(BuildContext context, String categoryName) {
+  Widget _buildCategoryCard(BuildContext context, String categoryName, int index) {
     return Container(
       width: 100,
       margin: const EdgeInsets.only(right: 12),
@@ -218,13 +277,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             width: 80,
             height: 80,
             decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.primaryContainer,
+              color: AppColors.primaryLight,
               borderRadius: BorderRadius.circular(12),
             ),
             child: Icon(
-              Icons.category,
+              _categoryIcons[index],
               size: 40,
-              color: Theme.of(context).colorScheme.onPrimaryContainer,
+              color: AppColors.primary,
             ),
           ),
           const SizedBox(height: 8),
@@ -252,7 +311,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'الأكثر مبيعاً',
+                'الأكثر رواجاً',
                 style: Theme.of(context).textTheme.headlineSmall,
               ),
               TextButton(
@@ -290,7 +349,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'وصل حديثاً',
+                'أحدث التشكيلات',
                 style: Theme.of(context).textTheme.headlineSmall,
               ),
               TextButton(
@@ -318,42 +377,134 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
   Widget _buildProductCard(BuildContext context, String productName) {
     return Container(
-      width: 150,
+      width: 170,
       margin: const EdgeInsets.only(right: 12),
       child: Card(
+        elevation: 2,
+        shadowColor: Colors.grey.withOpacity(0.2),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Container(
-              height: 120,
-              decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.surfaceVariant,
-                borderRadius: const BorderRadius.vertical(
-                  top: Radius.circular(8),
+            Stack(
+              children: [
+                Container(
+                  height: 200,
+                  decoration: BoxDecoration(
+                    color: AppColors.surface,
+                    borderRadius: const BorderRadius.vertical(
+                      top: Radius.circular(12),
+                    ),
+                    image: const DecorationImage(
+                      image: NetworkImage('https://placehold.co/200x250'),
+                      fit: BoxFit.cover,
+                    ),
+                  ),
                 ),
-              ),
-              child: const Center(
-                child: Icon(Icons.image, size: 40),
-              ),
+                Positioned(
+                  top: 8,
+                  right: 8,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 4,
+                    ),
+                    decoration: BoxDecoration(
+                      color: AppColors.sale,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Text(
+                      '-30%',
+                      style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ),
+                Positioned(
+                  bottom: 8,
+                  left: 8,
+                  child: Row(
+                    children: [
+                      for (final size in ['S', 'M', 'L']) 
+                        Container(
+                          margin: const EdgeInsets.only(right: 4),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 6,
+                            vertical: 2,
+                          ),
+                          decoration: BoxDecoration(
+                            color: AppColors.surface,
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Text(
+                            size,
+                            style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                              fontWeight: FontWeight.w600,
+                              color: AppColors.text,
+                            ),
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+              ],
             ),
             Padding(
-              padding: const EdgeInsets.all(8),
+              padding: const EdgeInsets.all(12),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  Row(
+                    children: [
+                      for (final color in [Colors.black, Colors.blue, Colors.red])
+                        Container(
+                          width: 16,
+                          height: 16,
+                          margin: const EdgeInsets.only(right: 4),
+                          decoration: BoxDecoration(
+                            color: color,
+                            shape: BoxShape.circle,
+                            border: Border.all(
+                              color: Colors.grey.shade300,
+                              width: 1,
+                            ),
+                          ),
+                        ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
                   Text(
                     productName,
-                    style: Theme.of(context).textTheme.bodyMedium,
+                    style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                      fontWeight: FontWeight.w500,
+                      color: AppColors.text,
+                    ),
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),
                   const SizedBox(height: 4),
-                  Text(
-                    '${AppConfig.defaultCurrency} 50,000',
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: Theme.of(context).colorScheme.primary,
-                      fontWeight: FontWeight.bold,
-                    ),
+                  Row(
+                    children: [
+                      Text(
+                        '${AppConfig.defaultCurrency} 35,000',
+                        style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                          color: AppColors.sale,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Text(
+                        '${AppConfig.defaultCurrency} 50,000',
+                        style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                          color: AppColors.textLight,
+                          decoration: TextDecoration.lineThrough,
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),

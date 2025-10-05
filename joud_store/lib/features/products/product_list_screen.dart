@@ -11,11 +11,11 @@ import 'models/product_filters.dart';
 import 'providers/product_provider.dart';
 
 class AppColors {
-  static const Color primary = Color(0xFFFF4081);
-  static const Color primaryGradientStart = Color(0xFFFF4081);
-  static const Color primaryGradientEnd = Color(0xFFFF80AB);
-  static const Color sale = Color(0xFFE91E63);
-  static const Color primaryLight = Color(0xFFFCE4EC);
+  static const Color primary = Color(0xFF6A1B9A);
+  static const Color primaryGradientStart = Color(0xFF8E24AA);
+  static const Color primaryGradientEnd = Color(0xFF6A1B9A);
+  static const Color sale = Color(0xFFD500F9);
+  static const Color primaryLight = Color(0xFFF3E5F5);
   static const Color text = Color(0xFF2C2C2C);
   static const Color textLight = Color(0xFF757575);
   static const Color background = Colors.white;

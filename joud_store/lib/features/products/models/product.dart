@@ -14,6 +14,19 @@ class Product {
   final DateTime createdAt;
   final DateTime updatedAt;
 
+  // Clothing-specific fields
+  final String? brand;
+  final String? material;
+  final String? fit;
+  final List<String> careInstructions;
+  final Map<String, int> sizeStock;
+  final List<String> occasions;
+  final String? season;
+  final String? style;
+  final Map<String, String> measurements;
+  final String? modelSize;
+  final String? modelHeight;
+
   const Product({
     required this.id,
     required this.name,
@@ -29,6 +42,17 @@ class Product {
     required this.isInStock,
     required this.createdAt,
     required this.updatedAt,
+    this.brand,
+    this.material,
+    this.fit,
+    this.careInstructions = const [],
+    this.sizeStock = const {},
+    this.occasions = const [],
+    this.season,
+    this.style,
+    this.measurements = const {},
+    this.modelSize,
+    this.modelHeight,
   });
 
   factory Product.fromJson(Map<String, dynamic> json) {
@@ -56,6 +80,25 @@ class Product {
       isInStock: json['isInStock'] as bool,
       createdAt: DateTime.parse(json['createdAt'] as String),
       updatedAt: DateTime.parse(json['updatedAt'] as String),
+      brand: json['brand'] as String?,
+      material: json['material'] as String?,
+      fit: json['fit'] as String?,
+      careInstructions: json['careInstructions'] != null
+          ? List<String>.from(json['careInstructions'] as List)
+          : [],
+      sizeStock: json['sizeStock'] != null
+          ? Map<String, int>.from(json['sizeStock'] as Map)
+          : {},
+      occasions: json['occasions'] != null
+          ? List<String>.from(json['occasions'] as List)
+          : [],
+      season: json['season'] as String?,
+      style: json['style'] as String?,
+      measurements: json['measurements'] != null
+          ? Map<String, String>.from(json['measurements'] as Map)
+          : {},
+      modelSize: json['modelSize'] as String?,
+      modelHeight: json['modelHeight'] as String?,
     );
   }
 
@@ -75,6 +118,17 @@ class Product {
       'isInStock': isInStock,
       'createdAt': createdAt.toIso8601String(),
       'updatedAt': updatedAt.toIso8601String(),
+      'brand': brand,
+      'material': material,
+      'fit': fit,
+      'careInstructions': careInstructions,
+      'sizeStock': sizeStock,
+      'occasions': occasions,
+      'season': season,
+      'style': style,
+      'measurements': measurements,
+      'modelSize': modelSize,
+      'modelHeight': modelHeight,
     };
   }
 
@@ -93,6 +147,17 @@ class Product {
     bool? isInStock,
     DateTime? createdAt,
     DateTime? updatedAt,
+    String? brand,
+    String? material,
+    String? fit,
+    List<String>? careInstructions,
+    Map<String, int>? sizeStock,
+    List<String>? occasions,
+    String? season,
+    String? style,
+    Map<String, String>? measurements,
+    String? modelSize,
+    String? modelHeight,
   }) {
     return Product(
       id: id ?? this.id,
@@ -109,6 +174,17 @@ class Product {
       isInStock: isInStock ?? this.isInStock,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
+      brand: brand ?? this.brand,
+      material: material ?? this.material,
+      fit: fit ?? this.fit,
+      careInstructions: careInstructions ?? this.careInstructions,
+      sizeStock: sizeStock ?? this.sizeStock,
+      occasions: occasions ?? this.occasions,
+      season: season ?? this.season,
+      style: style ?? this.style,
+      measurements: measurements ?? this.measurements,
+      modelSize: modelSize ?? this.modelSize,
+      modelHeight: modelHeight ?? this.modelHeight,
     );
   }
 }
