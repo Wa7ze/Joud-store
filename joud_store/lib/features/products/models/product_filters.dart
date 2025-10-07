@@ -1,7 +1,8 @@
+/// Filters used when querying the product catalog.
 class ProductFilters {
-  final String? categoryId;
-  final String? subcategory;
-  final String? sortBy;
+  final String? categoryId;       // "men", "women", "kids", etc.
+  final String? subcategory;      // "jeans", "tshirts", "abayas", etc.
+  final String? sortBy;           // "latest", "price_asc", "price_desc", "popularity"
   final double? minPrice;
   final double? maxPrice;
   final String? searchQuery;
