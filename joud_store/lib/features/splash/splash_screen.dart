@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../core/localization/localization_service.dart';
-import '../../core/theme/app_theme.dart';
+import '../../core/theme/app_colors.dart';
 import '../../core/router/app_router.dart';
 
 class SplashScreen extends ConsumerStatefulWidget {
@@ -32,7 +32,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
     final localizationService = LocalizationService.instance;
     
     return Scaffold(
-      backgroundColor: AppTheme.primaryColor,
+      backgroundColor: AppColors.primary,
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -42,20 +42,24 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
               width: 120,
               height: 120,
               decoration: BoxDecoration(
-                color: Colors.white,
+                gradient: const LinearGradient(
+                  colors: AppColors.primaryGradient,
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
                 borderRadius: BorderRadius.circular(24),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.1),
+                    color: AppColors.primary.withOpacity(0.3),
                     blurRadius: 20,
                     offset: const Offset(0, 10),
                   ),
                 ],
               ),
-              child: const Icon(
-                Icons.store,
+              child: Icon(
+                Icons.checkroom,  // Changed to clothing store icon
                 size: 60,
-                color: AppTheme.primaryColor,
+                color: Colors.white,
               ),
             ),
             

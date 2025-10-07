@@ -7,6 +7,8 @@ class ProductFilters {
   final String? searchQuery;
   final List<String>? selectedSizes;
   final List<String>? selectedColors;
+  final List<String>? selectedStyles;
+  final List<String>? selectedOccasions;
 
   const ProductFilters({
     this.categoryId,
@@ -17,6 +19,8 @@ class ProductFilters {
     this.searchQuery,
     this.selectedSizes,
     this.selectedColors,
+    this.selectedStyles,
+    this.selectedOccasions,
   });
 
   ProductFilters copyWith({
@@ -28,6 +32,8 @@ class ProductFilters {
     String? searchQuery,
     List<String>? selectedSizes,
     List<String>? selectedColors,
+    List<String>? selectedStyles,
+    List<String>? selectedOccasions,
   }) {
     return ProductFilters(
       categoryId: categoryId ?? this.categoryId,
@@ -38,6 +44,8 @@ class ProductFilters {
       searchQuery: searchQuery ?? this.searchQuery,
       selectedSizes: selectedSizes ?? this.selectedSizes,
       selectedColors: selectedColors ?? this.selectedColors,
+      selectedStyles: selectedStyles ?? this.selectedStyles,
+      selectedOccasions: selectedOccasions ?? this.selectedOccasions,
     );
   }
 }

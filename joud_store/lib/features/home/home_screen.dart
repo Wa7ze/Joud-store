@@ -5,7 +5,8 @@ import '../../core/localization/localization_service.dart';
 import '../../core/widgets/ui_states.dart';
 import '../../core/router/app_router.dart';
 import '../../core/config/app_config.dart';
-import '../products/product_list_screen.dart';
+import '../../core/theme/app_colors.dart';
+import '../products/product_list_screen.dart' hide AppColors;
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
@@ -19,12 +20,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   bool _isLoading = false;
 
   final List<IconData> _categoryIcons = [
-    Icons.man,
-    Icons.woman,
-    Icons.child_care,
-    Icons.hiking,
-    Icons.watch,
-    Icons.fitness_center,
+    Icons.man_outlined,           // Men's clothing
+    Icons.woman_outlined,         // Women's clothing
+    Icons.child_care_outlined,    // Kids' clothing
+    Icons.business_center,        // Formal wear
+    Icons.sports_soccer_outlined, // Sports wear
+    Icons.watch,                  // Accessories
+    Icons.event_available,        // Seasonal collections
   ];
 
   @override
@@ -113,24 +115,27 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         children: [
           _buildBannerCard(
             context,
-            'تشكيلة الخريف',
-            'أحدث صيحات الموضة',
-            AppColors.primaryGradientStart,
-            AppColors.primaryGradientEnd,
-          ),
-          _buildBannerCard(
-            context,
-            'عروض نهاية الموسم',
-            'خصم يصل إلى 50%',
-            AppColors.sale,
-            AppColors.sale.withOpacity(0.8),
-          ),
-          _buildBannerCard(
-            context,
-            'أزياء رمضان',
-            'مجموعة حصرية',
-            AppColors.primary,
+            'مجموعة خريف وشتاء 2025',
+            'أناقة وراحة بألوان الموسم',
             AppColors.primaryLight,
+            AppColors.primary,
+            icon: Icons.style_outlined,
+          ),
+          _buildBannerCard(
+            context,
+            'تخفيضات نهاية الموسم',
+            'خصومات حتى 70% على الأزياء',
+            AppColors.accent,
+            AppColors.accentDark,
+            icon: Icons.local_offer_outlined,
+          ),
+          _buildBannerCard(
+            context,
+            'مجموعة الأعراس',
+            'تألقي في ليلة العمر',
+            AppColors.primary,
+            AppColors.primaryDark,
+            icon: Icons.celebration_outlined,
           ),
         ],
       ),
@@ -143,6 +148,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     String subtitle,
     Color startColor,
     Color endColor,
+    {IconData icon = Icons.shopping_bag_outlined}
   ) {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 8),
@@ -167,7 +173,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             right: -20,
             bottom: -20,
             child: Icon(
-              Icons.shopping_bag_outlined,
+              icon,
               size: 140,
               color: Colors.white.withOpacity(0.2),
             ),
@@ -248,15 +254,16 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           child: ListView.builder(
             scrollDirection: Axis.horizontal,
             padding: const EdgeInsets.symmetric(horizontal: 16),
-            itemCount: 6,
+            itemCount: 7,
             itemBuilder: (context, index) {
               final categories = [
-                'رجالي',
-                'نسائي',
+                'رجال',
+                'نساء',
                 'أطفال',
-                'أحذية',
-                'إكسسوارات',
-                'رياضة',
+                'ملابس رسمية',
+                'ملابس رياضية',
+                'اكسسوارات',
+                'مجموعات موسمية',
               ];
 
               return _buildCategoryCard(context, categories[index], index);
@@ -311,7 +318,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'الأكثر رواجاً',
+                'الأكثر مبيعاً هذا الموسم',
                 style: Theme.of(context).textTheme.headlineSmall,
               ),
               TextButton(
@@ -349,7 +356,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'أحدث التشكيلات',
+                'وصل حديثاً | خريف 2025',
                 style: Theme.of(context).textTheme.headlineSmall,
               ),
               TextButton(
@@ -381,7 +388,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       margin: const EdgeInsets.only(right: 12),
       child: Card(
         elevation: 2,
-        shadowColor: Colors.grey.withOpacity(0.2),
+        shadowColor: AppColors.primary.withOpacity(0.1),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(12),
         ),
@@ -393,7 +400,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 Container(
                   height: 200,
                   decoration: BoxDecoration(
-                    color: AppColors.surface,
+                    color: AppColors.surfaceVariant,
                     borderRadius: const BorderRadius.vertical(
                       top: Radius.circular(12),
                     ),
@@ -403,6 +410,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     ),
                   ),
                 ),
+                // Sale Tag
                 Positioned(
                   top: 8,
                   right: 8,
@@ -415,39 +423,113 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       color: AppColors.sale,
                       borderRadius: BorderRadius.circular(12),
                     ),
-                    child: Text(
-                      '-30%',
-                      style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                      ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          Icons.local_offer_outlined,
+                          size: 14,
+                          color: AppColors.onSale,
+                        ),
+                        const SizedBox(width: 4),
+                        Text(
+                          '-30%',
+                          style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                            color: AppColors.onSale,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ),
+                // Quick Actions
+                Positioned(
+                  top: 8,
+                  left: 8,
+                  child: Column(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(6),
+                        decoration: BoxDecoration(
+                          color: AppColors.surface,
+                          shape: BoxShape.circle,
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.1),
+                              blurRadius: 4,
+                              offset: const Offset(0, 2),
+                            ),
+                          ],
+                        ),
+                        child: Icon(
+                          Icons.favorite_border,
+                          size: 18,
+                          color: AppColors.primary,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Container(
+                        padding: const EdgeInsets.all(6),
+                        decoration: BoxDecoration(
+                          color: AppColors.surface,
+                          shape: BoxShape.circle,
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.1),
+                              blurRadius: 4,
+                              offset: const Offset(0, 2),
+                            ),
+                          ],
+                        ),
+                        child: Icon(
+                          Icons.shopping_cart_outlined,
+                          size: 18,
+                          color: AppColors.primary,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                // Size Options
                 Positioned(
                   bottom: 8,
                   left: 8,
+                  right: 8,
                   child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      for (final size in ['S', 'M', 'L']) 
-                        Container(
-                          margin: const EdgeInsets.only(right: 4),
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 6,
-                            vertical: 2,
-                          ),
-                          decoration: BoxDecoration(
-                            color: AppColors.surface,
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: Text(
-                            size,
-                            style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                              fontWeight: FontWeight.w600,
-                              color: AppColors.text,
+                      // Sizes
+                      Row(
+                        children: [
+                          for (final size in ['S', 'M', 'L']) 
+                            Container(
+                              margin: const EdgeInsets.only(right: 4),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 6,
+                                vertical: 2,
+                              ),
+                              decoration: BoxDecoration(
+                                color: AppColors.surface,
+                                borderRadius: BorderRadius.circular(8),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black.withOpacity(0.1),
+                                    blurRadius: 4,
+                                    offset: const Offset(0, 2),
+                                  ),
+                                ],
+                              ),
+                              child: Text(
+                                size,
+                                style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                                  fontWeight: FontWeight.w600,
+                                  color: AppColors.onSurface,
+                                ),
+                              ),
                             ),
-                          ),
-                        ),
+                        ],
+                      ),
                     ],
                   ),
                 ),
@@ -458,6 +540,25 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  // Product Type Label
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 4,
+                    ),
+                    decoration: BoxDecoration(
+                      color: AppColors.surfaceVariant,
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                    child: Text(
+                      'قميص',
+                      style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                        color: AppColors.onSurfaceVariant,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  // Color Options
                   Row(
                     children: [
                       for (final color in [Colors.black, Colors.blue, Colors.red])
@@ -477,16 +578,39 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     ],
                   ),
                   const SizedBox(height: 8),
+                  // Product Name
                   Text(
                     productName,
                     style: Theme.of(context).textTheme.titleSmall?.copyWith(
                       fontWeight: FontWeight.w500,
-                      color: AppColors.text,
+                      color: AppColors.onSurface,
                     ),
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),
                   const SizedBox(height: 4),
+                  // Rating
+                  Row(
+                    children: [
+                      Icon(Icons.star, size: 14, color: Colors.amber),
+                      const SizedBox(width: 4),
+                      Text(
+                        '4.5',
+                        style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                          color: AppColors.onSurfaceVariant,
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Text(
+                        '(120)',
+                        style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                          color: AppColors.onSurfaceVariant,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 4),
+                  // Price
                   Row(
                     children: [
                       Text(

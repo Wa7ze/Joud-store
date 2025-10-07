@@ -50,18 +50,47 @@ class _ProductListScreenState extends ConsumerState<ProductListScreen> {
   
   final Set<String> _selectedSizes = {};
   final Set<String> _selectedColors = {};
+  final Set<String> _selectedStyles = {};
+  final Set<String> _selectedOccasions = {};
   
-  static const List<String> _availableSizes = ['XXS', 'XS', 'S', 'M', 'L', 'XL', 'XXL', '3XL'];
+  static const List<String> _availableSizes = ['XXS', 'XS', 'S', 'M', 'L', 'XL', 'XXL', '3XL', '4XL'];
   static const Map<String, Color> _availableColors = {
-    'Black': Colors.black,
-    'White': Colors.white,
-    'Grey': Color(0xFF757575),
-    'Navy': Color(0xFF000080),
-    'Beige': Color(0xFFF5F5DC),
-    'Brown': Color(0xFF8B4513),
-    'Pink': Color(0xFFFF4081),
-    'Red': Color(0xFFE53935),
+    'أبيض': Colors.white,
+    'أسود': Colors.black,
+    'أزرق': Color(0xFF2196F3),
+    'كحلي': Color(0xFF000080),
+    'أحمر': Color(0xFFE53935),
+    'أخضر': Color(0xFF4CAF50),
+    'أصفر': Color(0xFFFFEB3B),
+    'بني': Color(0xFF795548),
+    'رمادي': Color(0xFF9E9E9E),
+    'زهري': Color(0xFFFF4081),
+    'بنفسجي': Color(0xFF9C27B0),
+    'برتقالي': Color(0xFFFF9800),
+    'بيج': Color(0xFFF5F5DC),
   };
+
+  static const List<String> _availableStyles = [
+    'كاجوال',
+    'رسمي',
+    'رياضي',
+    'عصري',
+    'كلاسيك',
+    'أنيق',
+    'بسيط',
+    'تقليدي',
+  ];
+
+  static const List<String> _availableOccasions = [
+    'يومي',
+    'عمل',
+    'مناسبات',
+    'سهرة',
+    'رياضة',
+    'سفر',
+    'عيد',
+    'رمضان',
+  ];
   
 
   
@@ -79,6 +108,8 @@ class _ProductListScreenState extends ConsumerState<ProductListScreen> {
         maxPrice: _maxPrice,
         selectedSizes: _selectedSizes.toList(),
         selectedColors: _selectedColors.toList(),
+        selectedStyles: _selectedStyles.toList(),
+        selectedOccasions: _selectedOccasions.toList(),
       );
     });
   }
@@ -831,6 +862,74 @@ class _ProductListScreenState extends ConsumerState<ProductListScreen> {
                   
                   const SizedBox(height: 24),
                   
+                  // Styles
+                  Text(
+                    'الستايل',
+                    style: Theme.of(context).textTheme.titleMedium,
+                  ),
+                  const SizedBox(height: 8),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: _availableStyles.map((style) => FilterChip(
+                      label: Text(style),
+                      selected: _selectedStyles.contains(style),
+                      onSelected: (selected) {
+                        setState(() {
+                          if (selected) {
+                            _selectedStyles.add(style);
+                          } else {
+                            _selectedStyles.remove(style);
+                          }
+                        });
+                      },
+                      backgroundColor: AppColors.sizes,
+                      selectedColor: AppColors.primary.withOpacity(0.1),
+                      checkmarkColor: AppColors.primary,
+                      labelStyle: TextStyle(
+                        color: _selectedStyles.contains(style) 
+                          ? AppColors.primary 
+                          : AppColors.text,
+                      ),
+                    )).toList(),
+                  ),
+                  
+                  const SizedBox(height: 24),
+                  
+                  // Occasions
+                  Text(
+                    'المناسبة',
+                    style: Theme.of(context).textTheme.titleMedium,
+                  ),
+                  const SizedBox(height: 8),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: _availableOccasions.map((occasion) => FilterChip(
+                      label: Text(occasion),
+                      selected: _selectedOccasions.contains(occasion),
+                      onSelected: (selected) {
+                        setState(() {
+                          if (selected) {
+                            _selectedOccasions.add(occasion);
+                          } else {
+                            _selectedOccasions.remove(occasion);
+                          }
+                        });
+                      },
+                      backgroundColor: AppColors.sizes,
+                      selectedColor: AppColors.primary.withOpacity(0.1),
+                      checkmarkColor: AppColors.primary,
+                      labelStyle: TextStyle(
+                        color: _selectedOccasions.contains(occasion) 
+                          ? AppColors.primary 
+                          : AppColors.text,
+                      ),
+                    )).toList(),
+                  ),
+                  
+                  const SizedBox(height: 24),
+                  
                   // Apply Button
                   SizedBox(
                     width: double.infinity,
@@ -841,6 +940,8 @@ class _ProductListScreenState extends ConsumerState<ProductListScreen> {
                           maxPrice: _maxPrice,
                           selectedSizes: _selectedSizes.toList(),
                           selectedColors: _selectedColors.toList(),
+                          selectedStyles: _selectedStyles.toList(),
+                          selectedOccasions: _selectedOccasions.toList(),
                         );
                         Navigator.pop(context);
                         
@@ -856,6 +957,14 @@ class _ProductListScreenState extends ConsumerState<ProductListScreen> {
                         
                         if (_selectedColors.isNotEmpty) {
                           newFilters.add('الألوان: ${_selectedColors.join(', ')}');
+                        }
+
+                        if (_selectedStyles.isNotEmpty) {
+                          newFilters.add('الستايل: ${_selectedStyles.join(', ')}');
+                        }
+
+                        if (_selectedOccasions.isNotEmpty) {
+                          newFilters.add('المناسبات: ${_selectedOccasions.join(', ')}');
                         }
                         
                         setState(() {
