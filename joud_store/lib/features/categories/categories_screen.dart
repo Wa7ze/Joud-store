@@ -369,8 +369,7 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
             ],
           ),
         ),
-      ),
-    );
+      );
   }
 
   Widget _buildSubcategoryCard(
