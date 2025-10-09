@@ -1,4 +1,4 @@
-/// English localization strings
+﻿/// English localization strings
 class AppStringsEn {
   // App
   static const String appName = 'Syria Store';
@@ -153,6 +153,7 @@ class AppStringsEn {
   static const String addAddress = 'Add Address';
   static const String editAddress = 'Edit Address';
   static const String selectAddress = 'Select Address';
+  static const String addressEmptyMessage = 'Tap the add button to save your first address.';
   
   // Order
   static const String orderNumber = 'Order Number';
@@ -172,6 +173,14 @@ class AppStringsEn {
   static const String cashOnDelivery = 'Cash on Delivery';
   static const String placeOrder = 'Place Order';
   static const String orderSuccess = 'Order Placed Successfully';
+  static const String orderSuccessTitle = 'Order Success';
+  static const String orderSuccessHeadline = 'Thank you! Your order is confirmed and now being prepared.';
+  static const String orderSuccessFallback = 'We can’t show the order details right now, but you can track everything from the Orders tab.';
+  static const String orderItemsCount = 'Items count';
+  static const String deliveryFee = 'Delivery fee';
+  static const String orderPlacedAt = 'Order placed on';
+  static const String viewOrders = 'View orders';
+  static const String backToHome = 'Back to home';
   
   // Syria Governorates
   static const String damascus = 'Damascus';
@@ -188,7 +197,7 @@ class AppStringsEn {
   static const String daraa = 'Daraa';
   static const String sweida = 'Sweida';
   
-
+  // FAQ & Support
   static const String faqDeliveryTime = 'How long does delivery take?';
   static const String faqDeliveryTimeAnswer = 'Delivery typically takes 2-3 working days within Damascus, and 4-7 days for other governorates.';
   static const String faqPaymentMethods = 'What payment methods are available?';
@@ -227,4 +236,54 @@ class AppStringsEn {
   static const String addressDeleted = 'Address Deleted';
   static const String couponApplied = 'Coupon Applied';
   static const String settingsSaved = 'Settings Saved';
+  
+  // Settings
+  static const String currencyEquivalent = 'Show price in approximate USD';
+  static const String languageComingSoon = 'Language switcher is coming soon.';
+  static const String aboutDescription = 'Joud Store is a Syrian fashion platform offering the latest styles with reliable delivery.';
+  
+  // Checkout
+  static const String checkoutStepAddress = 'Shipping Address';
+  static const String checkoutStepDelivery = 'Delivery Options';
+  static const String checkoutStepPayment = 'Payment Method';
+  static const String checkoutStepReview = 'Review Order';
+  static const String checkoutAddressTitle = 'Delivery address details';
+  static const String checkoutAddressDescription = 'Select or add a delivery address so we can ship your order to the right place.';
+  static const String checkoutDeliveryTitle = 'Choose delivery method';
+  static const String checkoutDeliveryDescription = 'Pick the delivery option that suits you best and review any extra fees or timing before confirming.';
+  static const String checkoutPaymentTitle = 'Select payment method';
+  static const String checkoutPaymentDescription = 'We currently support cash on delivery. Online payment methods are coming soon.';
+  static const String checkoutReviewTitle = 'Order summary';
+  static const String checkoutSubtotalLabel = 'Items total';
+  static const String checkoutDeliveryFeeLabel = 'Delivery fee';
+  static const String checkoutTotalLabel = 'Amount due';
+  static const String checkoutEmptyMessage = 'Your cart is empty. Add items to continue to checkout.';
+  
+  // Search
+  static const String searchTrending = 'Trending searches';
+  static const String searchRecent = 'Recent searches';
+  static const String searchClearHistory = 'Clear search history';
+  static const String searchPlaceholder = 'Search for products, categories, or brands...';
+  static const String searchError = 'We couldn’t load search results. Please try again.';
+  static const String searchSuggestions = 'Search suggestions';
+  static const String trendSpringFreshLayers = 'Light spring dresses';
+  static const String trendSpringRamadanLooks = 'Ramadan outfits';
+  static const String trendSpringLightFabrics = 'Breathable spring fabrics';
+  static const String trendSummerLinen = 'Summer linen sets';
+  static const String trendSummerBeachwear = 'Beachwear';
+  static const String trendSummerEvening = 'Summer evening dresses';
+  static const String trendFallLayers = 'Cozy fall layers';
+  static const String trendFallEarthTones = 'Earth-tone outfits';
+  static const String trendFallBackToSchool = 'Back-to-school looks';
+  static const String trendWinterCoats = 'Winter coats';
+  static const String trendWinterKnitwear = 'Warm knitwear';
+  static const String trendWinterAccessories = 'Winter accessories';
+  static const String trendStyleCasual = 'Everyday chic';
+  static const String trendStyleEvening = 'Evening gowns';
+  static const String trendStyleModest = 'Modest fashion';
+  static const String trendStyleKids = 'Kidswear';
+  static const String trendOccasionWork = 'Workwear';
+  static const String trendOccasionWedding = 'Wedding guest looks';
+  static const String trendOccasionUniversity = 'Campus outfits';
+  static const String trendOccasionFamily = 'Family gatherings';
 }

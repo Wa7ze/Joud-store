@@ -1,9 +1,6 @@
 import 'dart:math';
-import '../models/user.dart';
-import '../models/address.dart';
 import '../models/category.dart';
 import '../models/product.dart';
-import '../models/order.dart';
 import '../models/coupon.dart';
 import '../models/notification.dart';
 

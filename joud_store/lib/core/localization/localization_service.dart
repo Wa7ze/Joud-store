@@ -9,7 +9,7 @@ class LocalizationService {
   
   LocalizationService._();
   
-  Locale _currentLocale = const Locale('ar', 'SY');
+  Locale _currentLocale = const Locale('en', 'US');
   
   Locale get currentLocale => _currentLocale;
   
@@ -28,7 +28,7 @@ class LocalizationService {
       case 'en':
         return _getEnglishString(key);
       default:
-        return _getArabicString(key); // Default to Arabic
+        return _getEnglishString(key); // Default to English
     }
   }
   
@@ -67,6 +67,7 @@ class LocalizationService {
       case 'orders': return AppStringsAr.orders;
       case 'categories': return AppStringsAr.categories;
       case 'products': return AppStringsAr.products;
+      case 'favorites': return '\u0627\u0644\u0645\u0641\u0636\u0644\u0629';
       case 'price': return AppStringsAr.price;
       case 'quantity': return AppStringsAr.quantity;
       case 'total': return AppStringsAr.total;
@@ -167,6 +168,7 @@ class LocalizationService {
       case 'addAddress': return AppStringsAr.addAddress;
       case 'editAddress': return AppStringsAr.editAddress;
       case 'selectAddress': return AppStringsAr.selectAddress;
+      case 'addressEmptyMessage': return AppStringsAr.addressEmptyMessage;
       
       // Order
       case 'orderNumber': return AppStringsAr.orderNumber;
@@ -186,6 +188,14 @@ class LocalizationService {
       case 'cashOnDelivery': return AppStringsAr.cashOnDelivery;
       case 'placeOrder': return AppStringsAr.placeOrder;
       case 'orderSuccess': return AppStringsAr.orderSuccess;
+      case 'orderSuccessTitle': return AppStringsAr.orderSuccessTitle;
+      case 'orderSuccessHeadline': return AppStringsAr.orderSuccessHeadline;
+      case 'orderSuccessFallback': return AppStringsAr.orderSuccessFallback;
+      case 'orderItemsCount': return AppStringsAr.orderItemsCount;
+      case 'deliveryFee': return AppStringsAr.deliveryFee;
+      case 'orderPlacedAt': return AppStringsAr.orderPlacedAt;
+      case 'viewOrders': return AppStringsAr.viewOrders;
+      case 'backToHome': return AppStringsAr.backToHome;
       
       // Syria Governorates
       case 'damascus': return AppStringsAr.damascus;
@@ -210,6 +220,9 @@ class LocalizationService {
       case 'notificationsEnabled': return AppStringsAr.notificationsEnabled;
       case 'about': return AppStringsAr.about;
       case 'version': return AppStringsAr.version;
+      case 'currencyEquivalent': return AppStringsAr.currencyEquivalent;
+      case 'languageComingSoon': return AppStringsAr.languageComingSoon;
+      case 'aboutDescription': return AppStringsAr.aboutDescription;
       
       // Support
       case 'contactUs': return AppStringsAr.contactUs;
@@ -217,6 +230,51 @@ class LocalizationService {
       case 'call': return AppStringsAr.call;
       case 'businessHours': return AppStringsAr.businessHours;
       case 'supportMessage': return AppStringsAr.supportMessage;
+      
+      // Checkout
+      case 'checkoutStepAddress': return AppStringsAr.checkoutStepAddress;
+      case 'checkoutStepDelivery': return AppStringsAr.checkoutStepDelivery;
+      case 'checkoutStepPayment': return AppStringsAr.checkoutStepPayment;
+      case 'checkoutStepReview': return AppStringsAr.checkoutStepReview;
+      case 'checkoutAddressTitle': return AppStringsAr.checkoutAddressTitle;
+      case 'checkoutAddressDescription': return AppStringsAr.checkoutAddressDescription;
+      case 'checkoutDeliveryTitle': return AppStringsAr.checkoutDeliveryTitle;
+      case 'checkoutDeliveryDescription': return AppStringsAr.checkoutDeliveryDescription;
+      case 'checkoutPaymentTitle': return AppStringsAr.checkoutPaymentTitle;
+      case 'checkoutPaymentDescription': return AppStringsAr.checkoutPaymentDescription;
+      case 'checkoutReviewTitle': return AppStringsAr.checkoutReviewTitle;
+      case 'checkoutSubtotalLabel': return AppStringsAr.checkoutSubtotalLabel;
+      case 'checkoutDeliveryFeeLabel': return AppStringsAr.checkoutDeliveryFeeLabel;
+      case 'checkoutTotalLabel': return AppStringsAr.checkoutTotalLabel;
+      case 'checkoutEmptyMessage': return AppStringsAr.checkoutEmptyMessage;
+      
+      // Search
+      case 'searchTrending': return AppStringsAr.searchTrending;
+      case 'searchRecent': return AppStringsAr.searchRecent;
+      case 'searchClearHistory': return AppStringsAr.searchClearHistory;
+      case 'searchPlaceholder': return AppStringsAr.searchPlaceholder;
+      case 'searchError': return AppStringsAr.searchError;
+      case 'searchSuggestions': return AppStringsAr.searchSuggestions;
+      case 'trendSpringFreshLayers': return AppStringsAr.trendSpringFreshLayers;
+      case 'trendSpringRamadanLooks': return AppStringsAr.trendSpringRamadanLooks;
+      case 'trendSpringLightFabrics': return AppStringsAr.trendSpringLightFabrics;
+      case 'trendSummerLinen': return AppStringsAr.trendSummerLinen;
+      case 'trendSummerBeachwear': return AppStringsAr.trendSummerBeachwear;
+      case 'trendSummerEvening': return AppStringsAr.trendSummerEvening;
+      case 'trendFallLayers': return AppStringsAr.trendFallLayers;
+      case 'trendFallEarthTones': return AppStringsAr.trendFallEarthTones;
+      case 'trendFallBackToSchool': return AppStringsAr.trendFallBackToSchool;
+      case 'trendWinterCoats': return AppStringsAr.trendWinterCoats;
+      case 'trendWinterKnitwear': return AppStringsAr.trendWinterKnitwear;
+      case 'trendWinterAccessories': return AppStringsAr.trendWinterAccessories;
+      case 'trendStyleCasual': return AppStringsAr.trendStyleCasual;
+      case 'trendStyleEvening': return AppStringsAr.trendStyleEvening;
+      case 'trendStyleModest': return AppStringsAr.trendStyleModest;
+      case 'trendStyleKids': return AppStringsAr.trendStyleKids;
+      case 'trendOccasionWork': return AppStringsAr.trendOccasionWork;
+      case 'trendOccasionWedding': return AppStringsAr.trendOccasionWedding;
+      case 'trendOccasionUniversity': return AppStringsAr.trendOccasionUniversity;
+      case 'trendOccasionFamily': return AppStringsAr.trendOccasionFamily;
       
       // Errors
       case 'networkError': return AppStringsAr.networkError;
@@ -288,6 +346,7 @@ class LocalizationService {
       case 'orders': return AppStringsEn.orders;
       case 'categories': return AppStringsEn.categories;
       case 'products': return AppStringsEn.products;
+      case 'favorites': return 'Favorites';
       case 'price': return AppStringsEn.price;
       case 'quantity': return AppStringsEn.quantity;
       case 'total': return AppStringsEn.total;
@@ -345,6 +404,7 @@ class LocalizationService {
       case 'addAddress': return AppStringsEn.addAddress;
       case 'editAddress': return AppStringsEn.editAddress;
       case 'selectAddress': return AppStringsEn.selectAddress;
+      case 'addressEmptyMessage': return AppStringsEn.addressEmptyMessage;
       
       // Order
       case 'orderNumber': return AppStringsEn.orderNumber;
@@ -364,6 +424,14 @@ class LocalizationService {
       case 'cashOnDelivery': return AppStringsEn.cashOnDelivery;
       case 'placeOrder': return AppStringsEn.placeOrder;
       case 'orderSuccess': return AppStringsEn.orderSuccess;
+      case 'orderSuccessTitle': return AppStringsEn.orderSuccessTitle;
+      case 'orderSuccessHeadline': return AppStringsEn.orderSuccessHeadline;
+      case 'orderSuccessFallback': return AppStringsEn.orderSuccessFallback;
+      case 'orderItemsCount': return AppStringsEn.orderItemsCount;
+      case 'deliveryFee': return AppStringsEn.deliveryFee;
+      case 'orderPlacedAt': return AppStringsEn.orderPlacedAt;
+      case 'viewOrders': return AppStringsEn.viewOrders;
+      case 'backToHome': return AppStringsEn.backToHome;
       
       // Syria Governorates
       case 'damascus': return AppStringsEn.damascus;
@@ -388,6 +456,9 @@ class LocalizationService {
       case 'notificationsEnabled': return AppStringsEn.notificationsEnabled;
       case 'about': return AppStringsEn.about;
       case 'version': return AppStringsEn.version;
+      case 'currencyEquivalent': return AppStringsEn.currencyEquivalent;
+      case 'languageComingSoon': return AppStringsEn.languageComingSoon;
+      case 'aboutDescription': return AppStringsEn.aboutDescription;
       
       // Support
       case 'contactUs': return AppStringsEn.contactUs;
@@ -395,6 +466,51 @@ class LocalizationService {
       case 'call': return AppStringsEn.call;
       case 'businessHours': return AppStringsEn.businessHours;
       case 'supportMessage': return AppStringsEn.supportMessage;
+      
+      // Checkout
+      case 'checkoutStepAddress': return AppStringsEn.checkoutStepAddress;
+      case 'checkoutStepDelivery': return AppStringsEn.checkoutStepDelivery;
+      case 'checkoutStepPayment': return AppStringsEn.checkoutStepPayment;
+      case 'checkoutStepReview': return AppStringsEn.checkoutStepReview;
+      case 'checkoutAddressTitle': return AppStringsEn.checkoutAddressTitle;
+      case 'checkoutAddressDescription': return AppStringsEn.checkoutAddressDescription;
+      case 'checkoutDeliveryTitle': return AppStringsEn.checkoutDeliveryTitle;
+      case 'checkoutDeliveryDescription': return AppStringsEn.checkoutDeliveryDescription;
+      case 'checkoutPaymentTitle': return AppStringsEn.checkoutPaymentTitle;
+      case 'checkoutPaymentDescription': return AppStringsEn.checkoutPaymentDescription;
+      case 'checkoutReviewTitle': return AppStringsEn.checkoutReviewTitle;
+      case 'checkoutSubtotalLabel': return AppStringsEn.checkoutSubtotalLabel;
+      case 'checkoutDeliveryFeeLabel': return AppStringsEn.checkoutDeliveryFeeLabel;
+      case 'checkoutTotalLabel': return AppStringsEn.checkoutTotalLabel;
+      case 'checkoutEmptyMessage': return AppStringsEn.checkoutEmptyMessage;
+      
+      // Search
+      case 'searchTrending': return AppStringsEn.searchTrending;
+      case 'searchRecent': return AppStringsEn.searchRecent;
+      case 'searchClearHistory': return AppStringsEn.searchClearHistory;
+      case 'searchPlaceholder': return AppStringsEn.searchPlaceholder;
+      case 'searchError': return AppStringsEn.searchError;
+      case 'searchSuggestions': return AppStringsEn.searchSuggestions;
+      case 'trendSpringFreshLayers': return AppStringsEn.trendSpringFreshLayers;
+      case 'trendSpringRamadanLooks': return AppStringsEn.trendSpringRamadanLooks;
+      case 'trendSpringLightFabrics': return AppStringsEn.trendSpringLightFabrics;
+      case 'trendSummerLinen': return AppStringsEn.trendSummerLinen;
+      case 'trendSummerBeachwear': return AppStringsEn.trendSummerBeachwear;
+      case 'trendSummerEvening': return AppStringsEn.trendSummerEvening;
+      case 'trendFallLayers': return AppStringsEn.trendFallLayers;
+      case 'trendFallEarthTones': return AppStringsEn.trendFallEarthTones;
+      case 'trendFallBackToSchool': return AppStringsEn.trendFallBackToSchool;
+      case 'trendWinterCoats': return AppStringsEn.trendWinterCoats;
+      case 'trendWinterKnitwear': return AppStringsEn.trendWinterKnitwear;
+      case 'trendWinterAccessories': return AppStringsEn.trendWinterAccessories;
+      case 'trendStyleCasual': return AppStringsEn.trendStyleCasual;
+      case 'trendStyleEvening': return AppStringsEn.trendStyleEvening;
+      case 'trendStyleModest': return AppStringsEn.trendStyleModest;
+      case 'trendStyleKids': return AppStringsEn.trendStyleKids;
+      case 'trendOccasionWork': return AppStringsEn.trendOccasionWork;
+      case 'trendOccasionWedding': return AppStringsEn.trendOccasionWedding;
+      case 'trendOccasionUniversity': return AppStringsEn.trendOccasionUniversity;
+      case 'trendOccasionFamily': return AppStringsEn.trendOccasionFamily;
       
       // Errors
       case 'networkError': return AppStringsEn.networkError;

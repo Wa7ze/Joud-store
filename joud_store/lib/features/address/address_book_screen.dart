@@ -1,35 +1,31 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/localization/localization_service.dart';
 import '../../core/widgets/ui_states.dart';
 
-class AddressBookScreen extends ConsumerStatefulWidget {
+class AddressBookScreen extends ConsumerWidget {
   const AddressBookScreen({super.key});
 
   @override
-  ConsumerState<AddressBookScreen> createState() => _AddressBookScreenState();
-}
-
-class _AddressBookScreenState extends ConsumerState<AddressBookScreen> {
-  @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final localizationService = LocalizationService.instance;
-    
+
     return ScreenScaffold(
       title: localizationService.getString('addressBook'),
+      showBackButton: true,
+      currentIndex: 4,
       floatingActionButton: FloatingActionButton(
-        onPressed: _addAddress,
+        onPressed: () {
+          // TODO: implement add address flow
+        },
+        tooltip: localizationService.getString('addAddress'),
         child: const Icon(Icons.add),
       ),
-      body: const EmptyState(
-        title: 'لا توجد عناوين',
-        message: 'أضف عنوانك الأول للبدء',
+      body: EmptyState(
+        title: localizationService.getString('noAddresses'),
+        message: localizationService.getString('addressEmptyMessage'),
         icon: Icons.location_on_outlined,
       ),
     );
-  }
-
-  void _addAddress() {
-    // Navigate to add address screen
   }
 }

@@ -24,6 +24,9 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
     
     return ScreenScaffold(
       title: localizationService.getString('categories'),
+      showBackButton: false,
+      currentIndex: 1,
+      centerContent: false,
       body: categoriesAsync.when(
         data: (categories) => _buildCategoriesGrid(categories),
         loading: () => const LoadingState(),

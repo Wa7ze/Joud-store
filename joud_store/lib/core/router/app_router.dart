@@ -1,15 +1,21 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+
 import '../../features/splash/splash_screen.dart';
 import '../../features/auth/login_screen.dart';
 import '../../features/auth/signup_screen.dart';
 import '../../features/home/home_screen.dart';
 import '../../features/categories/categories_screen.dart';
+import '../../features/products/models/product_filters.dart';
 import '../../features/products/product_list_screen.dart';
-import '../../features/products/product_detail_screen.dart';
+import '../../features/products/screens/product_details_screen.dart';
+import '../../features/products/screens/favorites_screen.dart';
+import '../../features/products/services/product_service.dart';
+import '../../core/widgets/ui_states.dart';
 import '../../features/search/search_screen.dart';
 import '../../features/cart/cart_screen.dart';
 import '../../features/checkout/checkout_screen.dart';
+import '../../features/checkout/order_success_screen.dart';
 import '../../features/address/address_book_screen.dart';
 import '../../features/orders/orders_screen.dart';
 import '../../features/orders/order_detail_screen.dart';
@@ -30,9 +36,11 @@ class AppRouter {
   static const String categories = '/categories';
   static const String productList = '/products';
   static const String productDetail = '/product';
+  static const String favorites = '/favorites';
   static const String search = '/search';
   static const String cart = '/cart';
   static const String checkout = '/checkout';
+  static const String orderSuccess = '/order-success';
   static const String addressBook = '/addresses';
   static const String orders = '/orders';
   static const String orderDetail = '/order';
@@ -48,14 +56,11 @@ class AppRouter {
   static final GoRouter router = GoRouter(
     initialLocation: splash,
     routes: [
-      // Splash
       GoRoute(
         path: splash,
         name: 'splash',
         builder: (context, state) => const SplashScreen(),
       ),
-      
-      // Auth
       GoRoute(
         path: login,
         name: 'login',
@@ -66,28 +71,25 @@ class AppRouter {
         name: 'signup',
         builder: (context, state) => const SignupScreen(),
       ),
-      
-      // Main App
       GoRoute(
         path: home,
         name: 'home',
         builder: (context, state) => const HomeScreen(),
       ),
-      
-      // Categories
       GoRoute(
         path: categories,
         name: 'categories',
         builder: (context, state) => const CategoriesScreen(),
       ),
-      
-      // Products
       GoRoute(
         path: productList,
         name: 'productList',
         builder: (context, state) {
           final categoryId = state.uri.queryParameters['categoryId'];
-          return ProductListScreen(categoryId: categoryId);
+          final subcategory = state.uri.queryParameters['subcategory'];
+          return ProductListScreen(
+            filters: ProductFilters(categoryId: categoryId, subcategory: subcategory),
+          );
         },
       ),
       GoRoute(
@@ -95,11 +97,29 @@ class AppRouter {
         name: 'productDetail',
         builder: (context, state) {
           final productId = state.pathParameters['id']!;
-          return ProductDetailScreen(productId: productId);
+          return FutureBuilder(
+            future: ProductService().getProduct(productId),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState != ConnectionState.done) {
+                return const LoadingState();
+              }
+              if (!snapshot.hasData) {
+                return const EmptyState(
+                  title: '\u0627\u0644\u0645\u0646\u062a\u062c \u063a\u064a\u0631 \u0645\u062a\u0648\u0641\u0631',
+                  icon: Icons.info_outline,
+                  message: '\u0639\u0630\u0631\u0627\u064b\u060c \u0644\u0645 \u0646\u0639\u062f \u0646\u0633\u062a\u0637\u064a\u0639 \u0627\u0644\u0639\u062b\u0648\u0631 \u0639\u0644\u0649 \u0647\u0630\u0627 \u0627\u0644\u0645\u0646\u062a\u062c.',
+                );
+              }
+              return ProductDetailsScreen(product: snapshot.data!);
+            },
+          );
         },
       ),
-      
-      // Search
+      GoRoute(
+        path: favorites,
+        name: 'favorites',
+        builder: (context, state) => const FavoritesScreen(),
+      ),
       GoRoute(
         path: search,
         name: 'search',
@@ -108,8 +128,6 @@ class AppRouter {
           return SearchScreen(initialQuery: query);
         },
       ),
-      
-      // Cart & Checkout
       GoRoute(
         path: cart,
         name: 'cart',
@@ -120,15 +138,19 @@ class AppRouter {
         name: 'checkout',
         builder: (context, state) => const CheckoutScreen(),
       ),
-      
-      // Address Management
+      GoRoute(
+        path: orderSuccess,
+        name: 'orderSuccess',
+        builder: (context, state) {
+          final summary = state.extra is OrderSummary ? state.extra as OrderSummary : null;
+          return OrderSuccessScreen(summary: summary);
+        },
+      ),
       GoRoute(
         path: addressBook,
         name: 'addressBook',
         builder: (context, state) => const AddressBookScreen(),
       ),
-      
-      // Orders
       GoRoute(
         path: orders,
         name: 'orders',
@@ -142,22 +164,16 @@ class AppRouter {
           return OrderDetailScreen(orderId: orderId);
         },
       ),
-      
-      // Coupons
       GoRoute(
         path: coupons,
         name: 'coupons',
         builder: (context, state) => const CouponsScreen(),
       ),
-      
-      // Notifications
       GoRoute(
         path: notifications,
         name: 'notifications',
         builder: (context, state) => const NotificationsScreen(),
       ),
-      
-      // Settings & Profile
       GoRoute(
         path: settings,
         name: 'settings',
@@ -168,15 +184,11 @@ class AppRouter {
         name: 'profile',
         builder: (context, state) => const ProfileScreen(),
       ),
-      
-      // Support
       GoRoute(
         path: support,
         name: 'support',
         builder: (context, state) => const SupportScreen(),
       ),
-      
-      // Legal Pages
       GoRoute(
         path: terms,
         name: 'terms',

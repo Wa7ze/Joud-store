@@ -1,9 +1,9 @@
-import 'dart:math' as math;
-import 'package:shared_preferences/shared_preferences.dart';
+﻿import 'package:shared_preferences/shared_preferences.dart';
 import '../models/search_suggestion.dart';
 import '../../products/models/product.dart';
 import '../../products/services/product_service.dart';
 import '../../categories/services/category_service.dart';
+import '../../../core/localization/localization_service.dart';
 
 class SearchService {
   static const _maxRecentSearches = 10;
@@ -52,36 +52,68 @@ class SearchService {
     final now = DateTime.now();
     final month = now.month;
     final categories = await _categoryService.getCategories();
-    
-    // Seasonal suggestions based on current month
-    List<String> seasonal = [];
-    if (month >= 3 && month <= 5) { // Spring
-      seasonal = ['ربيعي', 'خفيف', 'كاجوال'];
-    } else if (month >= 6 && month <= 8) { // Summer
-      seasonal = ['صيفي', 'قطن', 'خفيف'];
-    } else if (month >= 9 && month <= 11) { // Fall
-      seasonal = ['خريفي', 'جاكيت', 'معطف خفيف'];
-    } else { // Winter
-      seasonal = ['شتوي', 'معطف', 'صوف'];
+    final localization = LocalizationService.instance;
+
+    final seasonalSuggestions = {
+      'spring': [
+        localization.getString('trendSpringFreshLayers'),
+        localization.getString('trendSpringRamadanLooks'),
+        localization.getString('trendSpringLightFabrics'),
+      ],
+      'summer': [
+        localization.getString('trendSummerLinen'),
+        localization.getString('trendSummerBeachwear'),
+        localization.getString('trendSummerEvening'),
+      ],
+      'fall': [
+        localization.getString('trendFallLayers'),
+        localization.getString('trendFallEarthTones'),
+        localization.getString('trendFallBackToSchool'),
+      ],
+      'winter': [
+        localization.getString('trendWinterCoats'),
+        localization.getString('trendWinterKnitwear'),
+        localization.getString('trendWinterAccessories'),
+      ],
+    };
+
+    late final List<String> seasonal;
+    if (month >= 3 && month <= 5) {
+      seasonal = seasonalSuggestions['spring']!;
+    } else if (month >= 6 && month <= 8) {
+      seasonal = seasonalSuggestions['summer']!;
+    } else if (month >= 9 && month <= 11) {
+      seasonal = seasonalSuggestions['fall']!;
+    } else {
+      seasonal = seasonalSuggestions['winter']!;
     }
 
-    // Add some popular categories
     final popularCategories = categories
         .where((c) => c.productCount > 100)
         .take(3)
         .map((c) => c.name)
         .toList();
 
-    // Add some popular styles and occasions
-    const styles = ['كاجوال', 'رسمي', 'رياضي', 'عصري'];
-    const occasions = ['مناسبات', 'أعراس', 'عمل', 'يومي'];
-
-    return [
-      ...seasonal,
-      ...popularCategories,
-      ...styles.take(2),
-      ...occasions.take(2),
+    final styles = [
+      localization.getString('trendStyleCasual'),
+      localization.getString('trendStyleEvening'),
+      localization.getString('trendStyleModest'),
+      localization.getString('trendStyleKids'),
     ];
+    final occasions = [
+      localization.getString('trendOccasionWork'),
+      localization.getString('trendOccasionWedding'),
+      localization.getString('trendOccasionUniversity'),
+      localization.getString('trendOccasionFamily'),
+    ];
+
+    final suggestions = <String>{};
+    suggestions.addAll(seasonal);
+    suggestions.addAll(popularCategories);
+    suggestions.addAll(styles.take(2));
+    suggestions.addAll(occasions.take(2));
+
+    return suggestions.toList();
   }
 
   // Get smart search suggestions based on input
@@ -89,7 +121,7 @@ class SearchService {
   Future<List<Product>> searchProducts(String query) async {
     final lowercaseQuery = query.toLowerCase();
     final products = await _productService.getProducts();
-    
+
     // First exact matches, then partial matches
     final exactMatches = <Product>[];
     final partialMatches = <Product>[];
@@ -102,11 +134,11 @@ class SearchService {
         product.style ?? '',
         product.material ?? '',
         product.fit ?? '',
-        ...product.occasions,
+        product.occasions,
         product.season ?? '',
       ].join(' ').toLowerCase();
 
-      if (product.name.toLowerCase() == lowercaseQuery || 
+      if (product.name.toLowerCase() == lowercaseQuery ||
           (product.brand?.toLowerCase() ?? '') == lowercaseQuery) {
         exactMatches.add(product);
       } else if (searchText.contains(lowercaseQuery)) {
@@ -122,7 +154,7 @@ class SearchService {
 
     final suggestions = <SearchSuggestion>[];
     final lowercaseInput = input.toLowerCase();
-    
+
     // Get all products and categories
     final products = await _productService.getProducts();
     final categories = await _categoryService.getCategories();

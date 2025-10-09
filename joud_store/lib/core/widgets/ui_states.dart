@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../core/localization/localization_service.dart';
+export 'screen_scaffold.dart';
 
 /// Loading state widget
 class LoadingState extends StatelessWidget {
@@ -187,40 +188,3 @@ class OfflineBanner extends StatelessWidget {
   }
 }
 
-/// Generic screen scaffold with common functionality
-class ScreenScaffold extends StatelessWidget {
-  final String title;
-  final Widget body;
-  final List<Widget>? actions;
-  final Widget? floatingActionButton;
-  final bool showBackButton;
-  final VoidCallback? onBackPressed;
-  
-  const ScreenScaffold({
-    super.key,
-    required this.title,
-    required this.body,
-    this.actions,
-    this.floatingActionButton,
-    this.showBackButton = true,
-    this.onBackPressed,
-  });
-  
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(title),
-        leading: showBackButton
-            ? IconButton(
-                icon: const Icon(Icons.arrow_back),
-                onPressed: onBackPressed ?? () => Navigator.of(context).pop(),
-              )
-            : null,
-        actions: actions,
-      ),
-      body: body,
-      floatingActionButton: floatingActionButton,
-    );
-  }
-}

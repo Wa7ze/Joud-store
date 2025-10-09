@@ -171,16 +171,31 @@ class ProductService {
   }) async {
     await Future.delayed(const Duration(milliseconds: 350));
 
+    String? effectiveCategory = categoryId;
+    String? effectiveSubcategory = subcategory;
+    String? normalizedQuery;
+    var shouldApplyTextFilter = true;
+
+    if (query != null && query.trim().isNotEmpty) {
+      normalizedQuery = query.trim().toLowerCase();
+      final mapping = _resolveArabicQuery(normalizedQuery);
+      if (mapping != null) {
+        effectiveCategory ??= mapping['categoryId'];
+        effectiveSubcategory ??= mapping['subcategory'];
+        shouldApplyTextFilter = false;
+      }
+    }
+
     Iterable<Product> results = _catalog;
 
-    if (categoryId != null && categoryId.isNotEmpty) {
-      results = results.where((p) => p.categoryId == categoryId);
+    if (effectiveCategory != null && effectiveCategory.isNotEmpty) {
+      results = results.where((p) => p.categoryId == effectiveCategory);
     }
-    if (subcategory != null && subcategory.isNotEmpty) {
-      results = results.where((p) => p.subcategory == subcategory);
+    if (effectiveSubcategory != null && effectiveSubcategory.isNotEmpty) {
+      results = results.where((p) => p.subcategory == effectiveSubcategory);
     }
-    if (query != null && query.trim().isNotEmpty) {
-      final q = query.trim().toLowerCase();
+    if (shouldApplyTextFilter && normalizedQuery != null && normalizedQuery.isNotEmpty) {
+      final q = normalizedQuery;
       results = results.where((p) =>
         p.name.toLowerCase().contains(q) ||
         p.brand?.toLowerCase().contains(q) == true ||
@@ -261,4 +276,56 @@ class ProductService {
     // using generic placeholder images by subcategory/color naming scheme
     return 'assets/images/$subSlug/$colorSlug.png';
   }
+}
+
+Map<String, String?>? _resolveArabicQuery(String query) {
+  const categoryKeywords = {
+    'رجالي': 'men',
+    'رجال': 'men',
+    'نسائي': 'women',
+    'نساء': 'women',
+    'حريمي': 'women',
+    'اطفال': 'kids',
+    'أطفال': 'kids',
+  };
+
+  const subcategoryKeywords = {
+    'جينز': 'jeans',
+    'بنطال': 'jeans',
+    'بناطيل': 'jeans',
+    'فستان': 'dresses',
+    'فساتين': 'dresses',
+    'عباية': 'abayas',
+    'عبايات': 'abayas',
+    'رياضة': 'sportswear',
+    'رياضي': 'sportswear',
+    'تيشيرت': 'tshirts',
+    'تيشرت': 'tshirts',
+    'قميص': 'shirts',
+    'قمصان': 'shirts',
+    'معطف': 'outerwear',
+    'جاكيت': 'jackets',
+  };
+
+  String? categoryId;
+  String? subcategory;
+
+  for (final entry in categoryKeywords.entries) {
+    if (query.contains(entry.key)) {
+      categoryId = entry.value;
+      break;
+    }
+  }
+  for (final entry in subcategoryKeywords.entries) {
+    if (query.contains(entry.key)) {
+      subcategory = entry.value;
+      break;
+    }
+  }
+
+  if (categoryId == null && subcategory == null) {
+    return null;
+  }
+
+  return {'categoryId': categoryId, 'subcategory': subcategory};
 }

@@ -1,25 +1,19 @@
-import 'dart:async';
+﻿import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../core/localization/localization_service.dart';
 import '../../core/widgets/ui_states.dart';
 import '../../core/router/app_router.dart';
-import '../../core/config/app_config.dart';
 import '../products/models/product.dart';
-import '../products/providers/product_provider.dart';
-import '../cart/providers/cart_provider.dart';
 import 'providers/search_provider.dart';
-import 'services/search_service.dart';
 import 'models/search_suggestion.dart';
+import '../../core/widgets/product_card.dart';
 
 class SearchScreen extends ConsumerStatefulWidget {
   final String? initialQuery;
-  
-  const SearchScreen({
-    super.key,
-    this.initialQuery,
-  });
+
+  const SearchScreen({super.key, this.initialQuery});
 
   @override
   ConsumerState<SearchScreen> createState() => _SearchScreenState();
@@ -28,7 +22,7 @@ class SearchScreen extends ConsumerStatefulWidget {
 class _SearchScreenState extends ConsumerState<SearchScreen> {
   final _searchController = TextEditingController();
   Timer? _debounceTimer;
-  
+
   @override
   void initState() {
     super.initState();
@@ -36,8 +30,6 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
     if (widget.initialQuery != null) {
       _performSearch(widget.initialQuery!);
     }
-    
-    // Initialize search service
     ref.read(searchServiceProvider).init();
   }
 
@@ -51,21 +43,31 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
   @override
   Widget build(BuildContext context) {
     final localizationService = LocalizationService.instance;
+    final textDirection = localizationService.textDirection;
     final searchResults = ref.watch(searchResultsProvider);
-    
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(localizationService.getString('search')),
-      ),
+
+    return ScreenScaffold(
+      title: localizationService.getString('search'),
+      showBackButton: true,
+      currentIndex: 0,
+      centerContent: false,
+      contentPadding: EdgeInsets.zero,
+      actions: [
+        IconButton(
+          icon: const Icon(Icons.filter_list),
+          tooltip: localizationService.getString('filter'),
+          onPressed: () => context.go(AppRouter.productList),
+        ),
+      ],
       body: Column(
         children: [
-          // Search Bar
           Padding(
             padding: const EdgeInsets.all(16),
             child: TextField(
               controller: _searchController,
+              textDirection: textDirection,
               decoration: InputDecoration(
-                hintText: localizationService.getString('search'),
+                hintText: localizationService.getString('searchPlaceholder'),
                 prefixIcon: const Icon(Icons.search),
                 suffixIcon: _searchController.text.isNotEmpty
                     ? IconButton(
@@ -73,16 +75,15 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                         onPressed: () {
                           _searchController.clear();
                           ref.read(searchResultsProvider.notifier).clear();
+                          ref.read(searchQueryProvider.notifier).state = '';
                         },
                       )
                     : null,
                 border: const OutlineInputBorder(),
               ),
-              onSubmitted: (query) => _performSearch(query),
+              onSubmitted: _performSearch,
               onChanged: (value) {
-                if (_debounceTimer?.isActive ?? false) {
-                  _debounceTimer!.cancel();
-                }
+                _debounceTimer?.cancel();
                 _debounceTimer = Timer(
                   const Duration(milliseconds: 300),
                   () => ref.read(searchQueryProvider.notifier).state = value,
@@ -90,19 +91,26 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
               },
             ),
           ),
-          
-          // Search Results or Suggestions
           Expanded(
-            child: searchResults.when(
-              data: (products) => products.isNotEmpty
-                  ? _buildSearchResults(products)
-                  : _buildSearchSuggestions(),
-              loading: () => const LoadingState(),
-              error: (_, __) => Center(
-                child: EmptyState(
-                  title: localizationService.getString('error'),
-                  message: localizationService.getString('searchError'),
-                  icon: Icons.error_outline,
+            child: Align(
+              alignment: Alignment.topCenter,
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 780),
+                child: searchResults.when(
+                  data: (products) => products.isNotEmpty
+                      ? _buildSearchResults(products)
+                      : _buildSearchSuggestions(localizationService),
+                  loading: () => const Padding(
+                    padding: EdgeInsets.only(top: 24),
+                    child: LoadingState(),
+                  ),
+                  error: (_, __) => Center(
+                    child: EmptyState(
+                      title: localizationService.getString('error'),
+                      message: localizationService.getString('searchError'),
+                      icon: Icons.error_outline,
+                    ),
+                  ),
                 ),
               ),
             ),
@@ -113,54 +121,87 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
   }
 
   Widget _buildSearchResults(List<Product> products) {
-    return ListView.builder(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
+    return GridView.builder(
+      shrinkWrap: true,
+      physics: const AlwaysScrollableScrollPhysics(),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 2,
+        crossAxisSpacing: 12,
+        mainAxisSpacing: 12,
+        childAspectRatio: 0.68,
+      ),
       itemCount: products.length,
       itemBuilder: (context, index) {
         final product = products[index];
-        return _buildProductCard(context, product);
+        return ProductCard(
+          product: product,
+          onTap: () => context.go('${AppRouter.productDetail}/${product.id}'),
+        );
       },
     );
   }
 
-  Widget _buildSearchSuggestions() {
+  Widget _buildSearchSuggestions(LocalizationService localization) {
+    final textDirection = localization.textDirection;
+
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment:
+            textDirection == TextDirection.rtl ? CrossAxisAlignment.end : CrossAxisAlignment.start,
         children: [
-          // Recent Searches
           Consumer(
-            builder: (context, ref, child) {
+            builder: (context, ref, _) {
               final recentSearches = ref.watch(recentSearchesProvider);
               return recentSearches.when(
                 data: (searches) => searches.isNotEmpty
                     ? Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                        crossAxisAlignment: textDirection == TextDirection.rtl
+                            ? CrossAxisAlignment.end
+                            : CrossAxisAlignment.start,
                         children: [
-                          _buildSectionTitle('البحث الأخير'),
+                          Row(
+                            textDirection: textDirection,
+                            children: [
+                              Expanded(
+                                child: _buildSectionTitle(
+                                  localization.getString('searchRecent'),
+                                  textDirection,
+                                ),
+                              ),
+                              TextButton(
+                                onPressed: () =>
+                                    ref.read(recentSearchesProvider.notifier).clearRecentSearches(),
+                                child: Text(localization.getString('searchClearHistory')),
+                              ),
+                            ],
+                          ),
                           const SizedBox(height: 8),
                           _buildSearchChips(searches, _onRecentSearchTap),
                           const SizedBox(height: 24),
                         ],
                       )
                     : const SizedBox.shrink(),
-                loading: () => const SizedBox.shrink(),
+                loading: () => const LoadingState(),
                 error: (_, __) => const SizedBox.shrink(),
               );
             },
           ),
-          
-          // Trending Searches
           Consumer(
-            builder: (context, ref, child) {
+            builder: (context, ref, _) {
               final trendingSearches = ref.watch(trendingSearchesProvider);
               return trendingSearches.when(
                 data: (searches) => searches.isNotEmpty
                     ? Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                        crossAxisAlignment: textDirection == TextDirection.rtl
+                            ? CrossAxisAlignment.end
+                            : CrossAxisAlignment.start,
                         children: [
-                          _buildSectionTitle('الأكثر بحثاً'),
+                          _buildSectionTitle(
+                            localization.getString('searchTrending'),
+                            textDirection,
+                          ),
                           const SizedBox(height: 8),
                           _buildSearchChips(searches, _onTrendingSearchTap),
                           const SizedBox(height: 24),
@@ -172,40 +213,54 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
               );
             },
           ),
-          
-          // Search Suggestions
-          if (_searchController.text.isNotEmpty)
-            Consumer(
-              builder: (context, ref, child) {
-                final suggestions = ref.watch(
-                  searchSuggestionsProvider,
-                );
-                return suggestions.when(
-                  data: (items) => items.isNotEmpty
-                      ? Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            _buildSectionTitle('اقتراحات البحث'),
-                            const SizedBox(height: 8),
-                            _buildSuggestionsList(items),
-                          ],
-                        )
-                      : const SizedBox.shrink(),
-                  loading: () => const LoadingState(),
-                  error: (_, __) => const SizedBox.shrink(),
-                );
-              },
-            ),
+          Consumer(
+            builder: (context, ref, _) {
+              final query = ref.watch(searchQueryProvider);
+              if (query.isEmpty) {
+                return const SizedBox.shrink();
+              }
+
+              final suggestions = ref.watch(searchSuggestionsProvider);
+              return suggestions.when(
+                data: (items) => items.isNotEmpty
+                    ? Column(
+                        crossAxisAlignment: textDirection == TextDirection.rtl
+                            ? CrossAxisAlignment.end
+                            : CrossAxisAlignment.start,
+                        children: [
+                          _buildSectionTitle(
+                            localization.getString('searchSuggestions'),
+                            textDirection,
+                          ),
+                          const SizedBox(height: 8),
+                          _buildSuggestionsList(items),
+                        ],
+                      )
+                    : const SizedBox.shrink(),
+                loading: () => const LoadingState(),
+                error: (_, __) => const SizedBox.shrink(),
+              );
+            },
+          ),
         ],
       ),
     );
   }
 
-  Widget _buildSectionTitle(String title) {
-    return Text(
-      title,
-      style: Theme.of(context).textTheme.titleMedium?.copyWith(
-        fontWeight: FontWeight.bold,
+  Widget _buildSectionTitle(String title, TextDirection textDirection) {
+    final textAlign = textDirection == TextDirection.rtl ? TextAlign.right : TextAlign.left;
+    final alignment = textDirection == TextDirection.rtl
+        ? Alignment.centerRight
+        : Alignment.centerLeft;
+
+    return Align(
+      alignment: alignment,
+      child: Text(
+        title,
+        style: Theme.of(context).textTheme.titleMedium?.copyWith(
+              fontWeight: FontWeight.bold,
+            ),
+        textAlign: textAlign,
       ),
     );
   }
@@ -220,106 +275,6 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
           onPressed: () => onTap(item),
         );
       }).toList(),
-    );
-  }
-
-  Widget _buildProductListItem(BuildContext context, ProductItem product) {
-    return Card(
-      margin: const EdgeInsets.only(bottom: 8),
-      child: InkWell(
-        onTap: () => context.go('${AppRouter.productDetail}/${product.id}'),
-        borderRadius: BorderRadius.circular(8),
-        child: Padding(
-          padding: const EdgeInsets.all(12),
-          child: Row(
-            children: [
-              // Product Image
-              Container(
-                width: 80,
-                height: 80,
-                decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.surfaceVariant,
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: const Center(
-                  child: Icon(Icons.image, size: 30),
-                ),
-              ),
-              
-              const SizedBox(width: 12),
-              
-              // Product Info
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      product.name,
-                      style: Theme.of(context).textTheme.titleMedium,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    const SizedBox(height: 4),
-                    
-                    // Rating
-                    Row(
-                      children: [
-                        Icon(
-                          Icons.star,
-                          size: 16,
-                          color: Colors.amber,
-                        ),
-                        const SizedBox(width: 4),
-                        Text(
-                          product.rating.toString(),
-                          style: Theme.of(context).textTheme.bodySmall,
-                        ),
-                      ],
-                    ),
-                    
-                    const SizedBox(height: 8),
-                    
-                    // Price
-                    Row(
-                      children: [
-                        Text(
-                          '${AppConfig.defaultCurrency} ${product.price.toStringAsFixed(0)}',
-                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            color: Theme.of(context).colorScheme.primary,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        if (product.originalPrice > product.price) ...[
-                          const SizedBox(width: 8),
-                          Text(
-                            '${AppConfig.defaultCurrency} ${product.originalPrice.toStringAsFixed(0)}',
-                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              decoration: TextDecoration.lineThrough,
-                              color: Theme.of(context).colorScheme.onSurfaceVariant,
-                            ),
-                          ),
-                        ],
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-              
-              // Add to Cart Button
-              IconButton(
-                icon: const Icon(Icons.add_shopping_cart),
-                onPressed: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text(LocalizationService.instance.getString('productAddedToCart')),
-                    ),
-                  );
-                },
-              ),
-            ],
-          ),
-        ),
-      ),
     );
   }
 
@@ -349,146 +304,9 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
     );
   }
 
-  Widget _buildProductCard(BuildContext context, Product product) {
-    return Card(
-      margin: const EdgeInsets.only(bottom: 8),
-      child: InkWell(
-        onTap: () => context.go('${AppRouter.productDetail}/${product.id}'),
-        borderRadius: BorderRadius.circular(8),
-        child: Padding(
-          padding: const EdgeInsets.all(12),
-          child: Row(
-            children: [
-              // Product Image
-              Container(
-                width: 80,
-                height: 80,
-                decoration: BoxDecoration(
-                  image: product.images.isNotEmpty
-                      ? DecorationImage(
-                          image: NetworkImage(product.images[0]),
-                          fit: BoxFit.cover,
-                        )
-                      : null,
-                  color: Theme.of(context).colorScheme.surfaceVariant,
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: product.images.isEmpty
-                    ? const Center(child: Icon(Icons.image, size: 30))
-                    : null,
-              ),
-              
-              const SizedBox(width: 12),
-              
-              // Product Info
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      product.name,
-                      style: Theme.of(context).textTheme.titleMedium,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    const SizedBox(height: 4),
-                    
-                    Row(
-                      children: [
-                        Icon(
-                          Icons.star,
-                          size: 16,
-                          color: Colors.amber,
-                        ),
-                        const SizedBox(width: 4),
-                        Text(
-                          product.rating.toString(),
-                          style: Theme.of(context).textTheme.bodySmall,
-                        ),
-                        const SizedBox(width: 8),
-                        Text(
-                          '(${product.reviewCount})',
-                          style: Theme.of(context).textTheme.bodySmall,
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 8),
-                    
-                    // Price
-                    Row(
-                      children: [
-                        Text(
-                          '${AppConfig.defaultCurrency} ${product.price.toStringAsFixed(0)}',
-                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            color: Theme.of(context).colorScheme.primary,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        if (product.originalPrice != null &&
-                            product.originalPrice! > product.price) ...[
-                          const SizedBox(width: 8),
-                          Text(
-                            '${AppConfig.defaultCurrency} ${product.originalPrice!.toStringAsFixed(0)}',
-                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              decoration: TextDecoration.lineThrough,
-                              color: Theme.of(context).colorScheme.onSurfaceVariant,
-                            ),
-                          ),
-                        ],
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-              
-              // Add to Cart Button
-              Consumer(
-                builder: (context, ref, child) {
-                  final isInCart = ref.watch(
-                    isProductInCartProvider(product.id),
-                  );
-                  return IconButton(
-                    icon: Icon(
-                      isInCart ? Icons.shopping_cart : Icons.add_shopping_cart,
-                      color: isInCart
-                          ? Theme.of(context).colorScheme.primary
-                          : null,
-                    ),
-                    onPressed: () {
-                      if (isInCart) {
-                        ref.read(cartProvider.notifier).removeFromCart(product.id);
-                      } else {
-                        ref.read(cartProvider.notifier).addToCart(product);
-                      }
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text(
-                            isInCart
-                                ? LocalizationService.instance
-                                    .getString('productRemovedFromCart')
-                                : LocalizationService.instance
-                                    .getString('productAddedToCart'),
-                          ),
-                        ),
-                      );
-                    },
-                  );
-                },
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
   void _performSearch(String query) {
     if (query.isEmpty) return;
-    
-    // Add to recent searches
     ref.read(recentSearchesProvider.notifier).addRecentSearch(query);
-    
-    // Perform search
     ref.read(searchResultsProvider.notifier).search(query);
   }
 
@@ -515,7 +333,9 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
         );
         break;
       case SuggestionType.product:
-        context.pushNamed('productDetail', pathParameters: {'id': ?suggestion.productId});
+        if (suggestion.productId != null) {
+          context.pushNamed('productDetail', pathParameters: {'id': suggestion.productId!});
+        }
         break;
       default:
         _searchController.text = suggestion.text;
@@ -523,26 +343,4 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
         break;
     }
   }
-}
-
-class ProductItem {
-  final String id;
-  final String name;
-  final double price;
-  final double originalPrice;
-  final String imageUrl;
-  final String category;
-  final bool isInStock;
-  final double rating;
-
-  ProductItem({
-    required this.id,
-    required this.name,
-    required this.price,
-    required this.originalPrice,
-    required this.imageUrl,
-    required this.category,
-    required this.isInStock,
-    required this.rating,
-  });
 }

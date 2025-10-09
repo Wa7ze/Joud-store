@@ -3,29 +3,29 @@ import 'package:flutter/material.dart';
 
 class AppLocalization {
   static const List<Locale> supportedLocales = [
-    Locale('ar', 'SY'), // Arabic (Syria) - Default
-    Locale('en', 'US'), // English (US) - Fallback
+    Locale('en', 'US'), // English (US) - Default
+    Locale('ar', 'SY'), // Arabic (Syria)
   ];
-  
-  static const Locale defaultLocale = Locale('ar', 'SY');
-  
+
+  static const Locale defaultLocale = Locale('en', 'US');
+
   static const Map<String, String> languageNames = {
-    'ar': 'العربية',
     'en': 'English',
+    'ar': 'العربية',
   };
-  
+
   static const Map<String, String> countryNames = {
-    'SY': 'سوريا',
     'US': 'United States',
+    'SY': 'سوريا',
   };
-  
+
   // RTL languages
   static const List<String> rtlLanguages = ['ar', 'he', 'fa', 'ur'];
-  
+
   static bool isRTL(String languageCode) {
     return rtlLanguages.contains(languageCode);
   }
-  
+
   static TextDirection getTextDirection(String languageCode) {
     return isRTL(languageCode) ? TextDirection.rtl : TextDirection.ltr;
   }

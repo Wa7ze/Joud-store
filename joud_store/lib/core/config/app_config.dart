@@ -2,8 +2,8 @@
 class AppConfig {
   static const bool mockMode = true; // Frontend-only mode
   static const String defaultCurrency = 'SYP';
-  static const String defaultLanguage = 'ar';
-  static const String fallbackLanguage = 'en';
+  static const String defaultLanguage = 'en';
+  static const String fallbackLanguage = 'ar';
   
   // Syria-specific settings
   static const String countryCode = 'SY';
