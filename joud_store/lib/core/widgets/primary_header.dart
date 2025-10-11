@@ -19,6 +19,7 @@ class PrimaryHeader extends StatefulWidget {
     this.onSettingsTap,
     this.searchHint = 'Search Here',
     this.showSearchBar = true,
+    this.showActionIcons = true,
   });
 
   final TextEditingController? searchController;
@@ -33,6 +34,7 @@ class PrimaryHeader extends StatefulWidget {
   final VoidCallback? onSettingsTap;
   final String searchHint;
   final bool showSearchBar;
+  final bool showActionIcons;
 
   @override
   State<PrimaryHeader> createState() => _PrimaryHeaderState();
@@ -158,15 +160,17 @@ class _PrimaryHeaderState extends State<PrimaryHeader> {
                           Row(
                             children: [
                               _BrandMark(onTap: widget.onBrandTap),
-                              const Spacer(),
-                              _IconRow(
-                                onGlobeTap: widget.onGlobeTap,
-                                onCurrencyTap: widget.onCurrencyTap,
-                                onCartTap: widget.onCartTap,
-                                onFavoritesTap: widget.onFavoritesTap,
-                                onProfileTap: widget.onProfileTap,
-                                onSettingsTap: widget.onSettingsTap,
-                              ),
+                              if (widget.showActionIcons) ...[
+                                const Spacer(),
+                                _IconRow(
+                                  onGlobeTap: widget.onGlobeTap,
+                                  onCurrencyTap: widget.onCurrencyTap,
+                                  onCartTap: widget.onCartTap,
+                                  onFavoritesTap: widget.onFavoritesTap,
+                                  onProfileTap: widget.onProfileTap,
+                                  onSettingsTap: widget.onSettingsTap,
+                                ),
+                              ],
                             ],
                           ),
                           if (widget.showSearchBar) ...[
@@ -198,7 +202,7 @@ class _PrimaryHeaderState extends State<PrimaryHeader> {
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
                         _BrandMark(onTap: widget.onBrandTap),
-                        const SizedBox(width: 24),
+                        if (widget.showSearchBar) const SizedBox(width: 24),
                         if (widget.showSearchBar)
                           Expanded(
                             child: Center(
@@ -213,21 +217,23 @@ class _PrimaryHeaderState extends State<PrimaryHeader> {
                                   hintText: widget.searchHint,
                                   onSubmitted: widget.onSearchSubmitted,
                                   onSearchIconPressed: widget.onSearchIconPressed,
+                                  ),
                                 ),
                               ),
-                            ),
-                          )
+                            )
                         else
                           const Spacer(),
-                        const SizedBox(width: 24),
-                        _IconRow(
-                          onGlobeTap: widget.onGlobeTap,
-                          onCurrencyTap: widget.onCurrencyTap,
-                          onCartTap: widget.onCartTap,
-                          onFavoritesTap: widget.onFavoritesTap,
-                          onProfileTap: widget.onProfileTap,
-                          onSettingsTap: widget.onSettingsTap,
-                        ),
+                        if (widget.showActionIcons) ...[
+                          const SizedBox(width: 24),
+                          _IconRow(
+                            onGlobeTap: widget.onGlobeTap,
+                            onCurrencyTap: widget.onCurrencyTap,
+                            onCartTap: widget.onCartTap,
+                            onFavoritesTap: widget.onFavoritesTap,
+                            onProfileTap: widget.onProfileTap,
+                            onSettingsTap: widget.onSettingsTap,
+                          ),
+                        ],
                       ],
                     );
                   },

@@ -3,13 +3,16 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../core/router/app_router.dart';
+import '../../core/theme/app_colors.dart';
 import '../../core/widgets/app_shell.dart';
 import '../products/models/product.dart';
 import '../products/services/product_service.dart';
 import 'widgets/category_nav_bar.dart';
 import 'widgets/category_showcase.dart';
+import 'widgets/brand_focus_section.dart';
 import 'widgets/hero_slideshow.dart';
 import 'widgets/marketing_grid.dart';
+import 'widgets/newsletter_section.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
@@ -22,9 +25,15 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   final TextEditingController _searchController = TextEditingController();
   final ProductService _productService = ProductService();
   final Map<String, Future<List<Product>>> _categoryFutures = {};
+  final ScrollController _homeScrollController = ScrollController();
+  late final VoidCallback _homeScrollListener;
+  final Map<int, ScrollController> _categoryControllers = {};
+  final TextEditingController _newsletterController = TextEditingController();
 
   int _currentCategoryIndex = -1;
   int _previousCategoryIndex = -1;
+  bool _showScrollToTop = false;
+  bool _isSubmittingNewsletter = false;
 
   static const List<_CategoryLink> _categoryLinks = [
     _CategoryLink(
@@ -130,8 +139,22 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   ];
 
   @override
+  void initState() {
+    super.initState();
+    _homeScrollListener = _onHomeScroll;
+    _homeScrollController.addListener(_homeScrollListener);
+  }
+
+  @override
   void dispose() {
+    _homeScrollController
+      ..removeListener(_homeScrollListener)
+      ..dispose();
+    for (final controller in _categoryControllers.values) {
+      controller.dispose();
+    }
     _searchController.dispose();
+    _newsletterController.dispose();
     super.dispose();
   }
 
@@ -162,12 +185,54 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       );
   }
 
+  void _handleScroll(ScrollController controller) {
+    if (!controller.hasClients || !controller.position.hasContentDimensions) return;
+    final maxExtent = controller.position.maxScrollExtent;
+    final shouldShow = maxExtent > 0 && controller.offset >= maxExtent * 0.5;
+    if (shouldShow != _showScrollToTop) {
+      setState(() {
+        _showScrollToTop = shouldShow;
+      });
+    }
+  }
+
+  void _onHomeScroll() => _handleScroll(_homeScrollController);
+
+  void _scrollToTop() {
+    final controller = _currentScrollController;
+    if (!controller.hasClients) return;
+    controller.animateTo(
+      0,
+      duration: const Duration(milliseconds: 500),
+      curve: Curves.easeOutCubic,
+    );
+    setState(() => _showScrollToTop = false);
+  }
+
+  void _submitNewsletter(String email) {
+    final trimmed = email.trim();
+    final emailRegex = RegExp(r'^[\w\-.]+@[\w-]+\.[\w\-.]+$');
+    if (trimmed.isEmpty || !emailRegex.hasMatch(trimmed)) {
+      _showSnackBar('Please enter a valid email address.');
+      return;
+    }
+    if (_isSubmittingNewsletter) return;
+    setState(() => _isSubmittingNewsletter = true);
+    Future.delayed(const Duration(milliseconds: 900), () {
+      if (!mounted) return;
+      setState(() => _isSubmittingNewsletter = false);
+      _newsletterController.clear();
+      _showSnackBar('Thanks for subscribing! Check your inbox for a confirmation.');
+    });
+  }
+
   void _setCurrentCategory(int index) {
     if (_currentCategoryIndex == index) return;
     setState(() {
       _previousCategoryIndex = _currentCategoryIndex;
       _currentCategoryIndex = index;
     });
+    _scrollToTop();
   }
 
   void _handleLogoTap() {
@@ -179,6 +244,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     if (mounted) {
       context.go(AppRouter.home);
     }
+    _scrollToTop();
   }
 
   Future<List<Product>> _getCategoryProducts(_CategoryLink link) {
@@ -221,6 +287,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     return AppShell(
       centerContent: false,
       contentPadding: EdgeInsets.zero,
+      showHeaderActions: false,
+      showBottomNav: true,
+      bottomNavIndex: 0,
+      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
       searchController: _searchController,
       onSearchSubmitted: (_) => _handleSearch(),
       onSearchIconPressed: _handleSearch,
@@ -235,6 +305,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         selectedIndex: _currentCategoryIndex,
         onCategorySelected: _handleCategorySelected,
       ),
+      floatingActionButton: _showScrollToTop
+          ? FloatingActionButton(
+              onPressed: _scrollToTop,
+              backgroundColor: AppColors.accent,
+              foregroundColor: Colors.white,
+              child: const Icon(Icons.arrow_upward),
+            )
+          : null,
       body: AnimatedSwitcher(
         duration: const Duration(milliseconds: 450),
         transitionBuilder: (child, animation) {
@@ -253,15 +331,16 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         child: KeyedSubtree(
           key: currentKey,
           child: _currentCategoryIndex < 0
-              ? _buildHomeContent()
-              : _buildCategoryContent(context, _categoryLinks[_currentCategoryIndex], textDirection),
+              ? _buildHomeView()
+              : _buildCategoryView(_categoryLinks[_currentCategoryIndex], textDirection),
         ),
       ),
     );
   }
 
-  Widget _buildHomeContent() {
+  Widget _buildHomeView() {
     return SingleChildScrollView(
+      controller: _homeScrollController,
       child: Align(
         alignment: Alignment.topCenter,
         child: ConstrainedBox(
@@ -270,11 +349,19 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: const [
-                HeroSlideshow(),
-                SizedBox(height: 40),
-                MarketingGrid(),
-                SizedBox(height: 56),
+              children: [
+                const HeroSlideshow(),
+                const SizedBox(height: 40),
+                const MarketingGrid(),
+                const SizedBox(height: 40),
+                const BrandFocusSection(),
+                const SizedBox(height: 36),
+                NewsletterSection(
+                  controller: _newsletterController,
+                  onSubmit: _submitNewsletter,
+                  isSubmitting: _isSubmittingNewsletter,
+                ),
+                const SizedBox(height: 56),
               ],
             ),
           ),
@@ -283,12 +370,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     );
   }
 
-  Widget _buildCategoryContent(
-    BuildContext context,
+  Widget _buildCategoryView(
     _CategoryLink link,
     TextDirection direction,
   ) {
+    final controller = _ensureCategoryController(_currentCategoryIndex);
     return SingleChildScrollView(
+      controller: controller,
       child: Align(
         alignment: Alignment.topCenter,
         child: ConstrainedBox(
@@ -303,6 +391,22 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           ),
         ),
       ),
+    );
+  }
+
+  ScrollController get _currentScrollController {
+    if (_currentCategoryIndex < 0) return _homeScrollController;
+    return _ensureCategoryController(_currentCategoryIndex);
+  }
+
+  ScrollController _ensureCategoryController(int index) {
+    return _categoryControllers.putIfAbsent(
+      index,
+      () {
+        final controller = ScrollController();
+        controller.addListener(() => _handleScroll(controller));
+        return controller;
+      },
     );
   }
 

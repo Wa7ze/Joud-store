@@ -268,6 +268,11 @@ class _ShowcaseTileState extends State<_ShowcaseTile> with SingleTickerProviderS
       return Image.network(
         imagePath,
         fit: BoxFit.cover,
+        errorBuilder: (_, __, ___) => Container(
+          color: AppColors.surfaceVariant,
+          alignment: Alignment.center,
+          child: const Icon(Icons.image_not_supported_outlined, color: Colors.white54, size: 36),
+        ),
       );
     }
     return Image.asset(

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../core/localization/localization_service.dart';
+import '../../core/theme/app_colors.dart';
 import '../../core/widgets/ui_states.dart';
 import '../../core/router/app_router.dart';
 import 'providers/category_provider.dart';
@@ -15,7 +16,22 @@ class CategoriesScreen extends ConsumerStatefulWidget {
 }
 
 class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
-  String? _selectedCategory;
+  final ScrollController _scrollController = ScrollController();
+  bool _showScrollToTop = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _scrollController.addListener(_handleScroll);
+  }
+
+  @override
+  void dispose() {
+    _scrollController
+      ..removeListener(_handleScroll)
+      ..dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -26,7 +42,17 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
       title: localizationService.getString('categories'),
       showBackButton: false,
       currentIndex: 1,
+      showBottomNav: true,
       centerContent: false,
+      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
+      floatingActionButton: _showScrollToTop
+          ? FloatingActionButton(
+              onPressed: _scrollToTop,
+              backgroundColor: AppColors.accent,
+              foregroundColor: Colors.white,
+              child: const Icon(Icons.arrow_upward),
+            )
+          : null,
       body: categoriesAsync.when(
         data: (categories) => _buildCategoriesGrid(categories),
         loading: () => const LoadingState(),
@@ -47,6 +73,7 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
     };
 
     return CustomScrollView(
+      controller: _scrollController,
       slivers: [
         // Featured Categories
         SliverToBoxAdapter(
@@ -428,5 +455,23 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
         ),
       ),
     );
+  }
+
+  void _handleScroll() {
+    if (!_scrollController.hasClients || !_scrollController.position.hasContentDimensions) return;
+    final maxExtent = _scrollController.position.maxScrollExtent;
+    final shouldShow = maxExtent > 0 && _scrollController.offset >= maxExtent * 0.5;
+    if (shouldShow != _showScrollToTop) {
+      setState(() => _showScrollToTop = shouldShow);
+    }
+  }
+
+  void _scrollToTop() {
+    _scrollController.animateTo(
+      0,
+      duration: const Duration(milliseconds: 500),
+      curve: Curves.easeOutCubic,
+    );
+    setState(() => _showScrollToTop = false);
   }
 }

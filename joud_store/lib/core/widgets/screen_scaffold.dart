@@ -16,6 +16,8 @@ class ScreenScaffold extends StatelessWidget {
     this.actions,
     this.floatingActionButton,
     this.currentIndex = 0,
+    this.showBottomNav = false,
+    this.floatingActionButtonLocation = FloatingActionButtonLocation.endFloat,
     this.centerContent = true,
     this.contentPadding = const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
     this.maxContentWidth = 960,
@@ -42,6 +44,8 @@ class ScreenScaffold extends StatelessWidget {
   final List<Widget>? actions;
   final Widget? floatingActionButton;
   final int currentIndex; // kept for backwards compatibility
+  final bool showBottomNav;
+  final FloatingActionButtonLocation floatingActionButtonLocation;
   final bool centerContent;
   final EdgeInsetsGeometry contentPadding;
   final double maxContentWidth;
@@ -67,10 +71,14 @@ class ScreenScaffold extends StatelessWidget {
       headerBottom: headerBottom,
       showHeader: showHeader,
       showSearchBar: showSearchBar,
+      showHeaderActions: false,
+      showBottomNav: showBottomNav,
+      bottomNavIndex: currentIndex,
       centerContent: centerContent,
       contentPadding: contentPadding,
       maxContentWidth: maxContentWidth,
       floatingActionButton: floatingActionButton,
+      floatingActionButtonLocation: floatingActionButtonLocation,
       searchController: searchController,
       onSearchSubmitted: onSearchSubmitted ?? (query) => _handleSearch(context, query),
       onSearchIconPressed: onSearchIconPressed,
