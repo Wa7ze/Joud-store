@@ -1,7 +1,7 @@
 /// English localization strings stored as a lookup map
 class AppStringsEn {
   static const Map<String, String> values = {
-    'appName': "Syria Store",
+    'appName': "Joud Store",
     'appDescription': "Your one-stop shop for all your needs in Syria",
     'headerMessage1': "Shop exclusive collections for every occasion.",
     'headerMessage2': "Get the best deals on your favorite brands.",
