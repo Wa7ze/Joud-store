@@ -28,45 +28,84 @@ class ProductService {
 
     // Size maps by category
     const sizeMap = {
-      'men': ['S','M','L','XL','2XL','3XL'],
-      'women': ['XS','S','M','L','XL','2XL'],
-      'kids': ['2','4','6','8','10','12','14'],
+      'men': ['S', 'M', 'L', 'XL', '2XL', '3XL'],
+      'women': ['XS', 'S', 'M', 'L', 'XL', '2XL'],
+      'kids': ['2', '4', '6', '8', '10', '12', '14'],
     };
 
     // Numeric jeans for men/women (28-40)
-    final jeansSizes = List<String>.generate(7, (i) => (28 + i*2).toString());
+    final jeansSizes = List<String>.generate(7, (i) => (28 + i * 2).toString());
 
     const colors = [
-      'Black','White','Navy','Blue','Light Blue','Grey',
-      'Beige','Brown','Green','Olive','Red','Burgundy','Pink','Purple'
+      'Black',
+      'White',
+      'Navy',
+      'Blue',
+      'Light Blue',
+      'Grey',
+      'Beige',
+      'Brown',
+      'Green',
+      'Olive',
+      'Red',
+      'Burgundy',
+      'Pink',
+      'Purple',
     ];
 
-    const brands = ['ShamWear','Aleppo Denim','Damascus Line','Coast & Cotton','Qasioun Sports'];
-    const materials = ['Cotton','Cotton Blend','Denim','Polyester','Viscose','Wool Blend'];
-    const fits = ['Regular','Slim','Oversized','Relaxed'];
-    const occasions = ['Casual','Formal','Sports'];
-    const seasons = ['Spring','Summer','Fall','Winter'];
-    const styles = ['Classic','Streetwear','Modest','Sporty','Minimal'];
+    const brands = [
+      'ShamWear',
+      'Aleppo Denim',
+      'Damascus Line',
+      'Coast & Cotton',
+      'Qasioun Sports',
+    ];
+    const materials = [
+      'Cotton',
+      'Cotton Blend',
+      'Denim',
+      'Polyester',
+      'Viscose',
+      'Wool Blend',
+    ];
+    const fits = ['Regular', 'Slim', 'Oversized', 'Relaxed'];
+    const occasions = ['Casual', 'Formal', 'Sports'];
+    const seasons = ['Spring', 'Summer', 'Fall', 'Winter'];
+    const styles = ['Classic', 'Streetwear', 'Modest', 'Sporty', 'Minimal'];
 
     int idCounter = 1000;
 
     // Helper to price by subcategory (SYP)
     double basePrice(String sub) {
       switch (sub) {
-        case 'tshirts': return 120000;
-        case 'shirts': return 220000;
-        case 'jeans': return 380000;
-        case 'chinos': return 300000;
-        case 'jackets': return 650000;
-        case 'sportswear': return 240000;
-        case 'blouses': return 230000;
-        case 'dresses': return 520000;
-        case 'abayas': return 900000;
-        case 'skirts': return 280000;
-        case 'outerwear': return 700000;
-        case 'hoodies': return 260000;
-        case 'sets': return 320000;
-        default: return 250000;
+        case 'tshirts':
+          return 120000;
+        case 'shirts':
+          return 220000;
+        case 'jeans':
+          return 380000;
+        case 'chinos':
+          return 300000;
+        case 'jackets':
+          return 650000;
+        case 'sportswear':
+          return 240000;
+        case 'blouses':
+          return 230000;
+        case 'dresses':
+          return 520000;
+        case 'abayas':
+          return 900000;
+        case 'skirts':
+          return 280000;
+        case 'outerwear':
+          return 700000;
+        case 'hoodies':
+          return 260000;
+        case 'sets':
+          return 320000;
+        default:
+          return 250000;
       }
     }
 
@@ -81,13 +120,15 @@ class ProductService {
       final name = _titleFor(cat, sub, brand, style);
       final price0 = basePrice(sub);
       final price = (price0 * (0.8 + _rng.nextDouble() * 0.6)).roundToDouble();
-      final discount = _rng.nextBool() && _rng.nextInt(5) == 0; // ~20% discounted
-      final originalPrice = discount ? (price * (1.10 + _rng.nextDouble()*0.25)) : null;
+      final discount =
+          _rng.nextBool() && _rng.nextInt(5) == 0; // ~20% discounted
+      final originalPrice = discount
+          ? (price * (1.10 + _rng.nextDouble() * 0.25))
+          : null;
 
       // Sizes & stock
-      List<String> sizes =
-          (sub == 'jeans') ? jeansSizes : sizeMap[cat]!;
-      final sizeStock = <String,int>{};
+      List<String> sizes = (sub == 'jeans') ? jeansSizes : sizeMap[cat]!;
+      final sizeStock = <String, int>{};
       for (final s in sizes) {
         // random stock 0-8 (some OOS)
         sizeStock[s] = _rng.nextInt(9);
@@ -110,11 +151,8 @@ class ProductService {
         categoryId: cat,
         subcategory: sub,
         images: images,
-        options: {
-          'size': sizes,
-          'color': colorOpts,
-        },
-        rating: 3.6 + _rng.nextDouble()*1.4,
+        options: {'size': sizes, 'color': colorOpts},
+        rating: 3.6 + _rng.nextDouble() * 1.4,
         reviewCount: 5 + _rng.nextInt(200),
         isInStock: isInStock,
         createdAt: now.subtract(Duration(days: _rng.nextInt(180))),
@@ -133,7 +171,9 @@ class ProductService {
         season: season,
         style: style,
         measurements: {
-          'Length': _rng.nextInt(20) + 60 >= 0 ? '${_rng.nextInt(20) + 60} cm' : '—',
+          'Length': _rng.nextInt(20) + 60 >= 0
+              ? '${_rng.nextInt(20) + 60} cm'
+              : '—',
           'Shoulder': '${_rng.nextInt(10) + 40} cm',
         },
         modelSize: (cat == 'kids') ? null : sizes[sizes.length ~/ 2],
@@ -194,13 +234,16 @@ class ProductService {
     if (effectiveSubcategory != null && effectiveSubcategory.isNotEmpty) {
       results = results.where((p) => p.subcategory == effectiveSubcategory);
     }
-    if (shouldApplyTextFilter && normalizedQuery != null && normalizedQuery.isNotEmpty) {
+    if (shouldApplyTextFilter &&
+        normalizedQuery != null &&
+        normalizedQuery.isNotEmpty) {
       final q = normalizedQuery;
-      results = results.where((p) =>
-        p.name.toLowerCase().contains(q) ||
-        p.brand?.toLowerCase().contains(q) == true ||
-        p.style?.toLowerCase().contains(q) == true ||
-        p.material?.toLowerCase().contains(q) == true
+      results = results.where(
+        (p) =>
+            p.name.toLowerCase().contains(q) ||
+            p.brand?.toLowerCase().contains(q) == true ||
+            p.style?.toLowerCase().contains(q) == true ||
+            p.material?.toLowerCase().contains(q) == true,
       );
     }
     if (minPrice != null) {
@@ -210,16 +253,22 @@ class ProductService {
       results = results.where((p) => p.price <= maxPrice);
     }
     if (sizes != null && sizes.isNotEmpty) {
-      results = results.where((p) => p.options['size']!.any((s) => sizes.contains(s)));
+      results = results.where(
+        (p) => p.options['size']!.any((s) => sizes.contains(s)),
+      );
     }
     if (colors != null && colors.isNotEmpty) {
-      results = results.where((p) => p.options['color']!.any((c) => colors.contains(c)));
+      results = results.where(
+        (p) => p.options['color']!.any((c) => colors.contains(c)),
+      );
     }
     if (styles != null && styles.isNotEmpty) {
       results = results.where((p) => styles.contains(p.style));
     }
     if (occasions != null && occasions.isNotEmpty) {
-      results = results.where((p) => p.occasions?.any(occasions.contains) == true);
+      results = results.where(
+        (p) => p.occasions?.any(occasions.contains) == true,
+      );
     }
 
     // Sorting
@@ -231,11 +280,13 @@ class ProductService {
         results = results.toList()..sort((a, b) => b.price.compareTo(a.price));
         break;
       case 'popularity':
-        results = results.toList()..sort((a, b) => b.reviewCount.compareTo(a.reviewCount));
+        results = results.toList()
+          ..sort((a, b) => b.reviewCount.compareTo(a.reviewCount));
         break;
       case 'latest':
       default:
-        results = results.toList()..sort((a, b) => b.createdAt.compareTo(a.createdAt));
+        results = results.toList()
+          ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
     }
 
     // Pagination
@@ -246,6 +297,19 @@ class ProductService {
     return list.sublist(start, end.clamp(0, list.length));
   }
 
+  Future<List<Product>> getRandomProducts(int count) async {
+    await Future.delayed(const Duration(milliseconds: 200));
+    if (_catalog.isEmpty || count <= 0) {
+      return const [];
+    }
+    final candidates = List<Product>.from(_catalog);
+    candidates.shuffle(Random());
+    final effectiveCount = count < candidates.length
+        ? count
+        : candidates.length;
+    return candidates.take(effectiveCount).toList();
+  }
+
   Future<Product> getProduct(String id) async {
     await Future.delayed(const Duration(milliseconds: 250));
     final p = _catalog.firstWhere((p) => p.id == id);
@@ -254,14 +318,25 @@ class ProductService {
 
   // === Helpers ===
   String _titleFor(String cat, String sub, String brand, String style) {
-    final niceCat = {'men': 'Men', 'women': 'Women', 'kids': 'Kids'}[cat] ?? 'All';
+    final niceCat =
+        {'men': 'Men', 'women': 'Women', 'kids': 'Kids'}[cat] ?? 'All';
     final niceSub = sub[0].toUpperCase() + sub.substring(1);
     return '$brand $niceCat $niceSub — $style';
   }
 
-  String _descriptionFor(String cat, String sub, String material, String fit, String style) {
-    return 'A $style $sub for ${cat == 'men' ? 'men' : cat == 'women' ? 'women' : 'kids'} '
-           'crafted from $material with a $fit fit. Soft hand-feel and everyday comfort.';
+  String _descriptionFor(
+    String cat,
+    String sub,
+    String material,
+    String fit,
+    String style,
+  ) {
+    return 'A $style $sub for ${cat == 'men'
+            ? 'men'
+            : cat == 'women'
+            ? 'women'
+            : 'kids'} '
+        'crafted from $material with a $fit fit. Soft hand-feel and everyday comfort.';
   }
 
   List<String> _pickN(List<String> list, int n) {

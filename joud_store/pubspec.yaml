@@ -42,6 +42,9 @@ dependencies:
   # Internationalization
   intl: ^0.20.2
   
+  # Dynamic translation
+  translator: ^1.0.4+1
+  
   # HTTP & JSON (prepared for backend)
   http: ^1.1.2
   json_annotation: ^4.8.1

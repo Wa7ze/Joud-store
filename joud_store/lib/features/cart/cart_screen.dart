@@ -1,302 +1,302 @@
-﻿import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import '../../core/localization/localization_service.dart';
-import '../../core/widgets/ui_states.dart';
-import '../../core/config/app_config.dart';
-import '../../core/router/app_router.dart';
-import 'providers/cart_provider.dart';
-import 'models/cart_item.dart';
 
-class CartScreen extends ConsumerStatefulWidget {
+import '../../core/localization/localization_service.dart';
+import '../../core/router/app_router.dart';
+import '../../core/utils/currency_utils.dart';
+import '../../core/widgets/page_container.dart';
+import '../../core/widgets/product_card.dart';
+import '../../core/widgets/ui_states.dart';
+import '../products/models/product.dart';
+import '../products/services/product_service.dart';
+
+class CartScreen extends StatefulWidget {
   const CartScreen({super.key});
 
   @override
-  ConsumerState<CartScreen> createState() => _CartScreenState();
+  State<CartScreen> createState() => _CartScreenState();
 }
 
-class _CartScreenState extends ConsumerState<CartScreen> {
-  bool _isLoading = false;
-  String? _appliedCoupon;
-  double _deliveryFee = 0;
+class _CartScreenState extends State<CartScreen>
+    with SingleTickerProviderStateMixin {
+  late Future<List<Product>> _cartProductsFuture;
 
   @override
   void initState() {
     super.initState();
-    _deliveryFee = AppConfig.deliveryFees['damascus'] ?? 5000;
+    _cartProductsFuture = ProductService().getProducts(
+      categoryId: 'men',
+      pageSize: 2,
+      sortBy: 'latest',
+    );
+  }
+
+  Future<void> _handleCheckout() async {
+    final localization = LocalizationService.instance;
+    final overlayState = Overlay.of(context);
+
+    final controller = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 2),
+    );
+
+    final overlayEntry = OverlayEntry(
+      builder: (context) => _CheckoutOverlay(
+        controller: controller,
+        processingLabel: localization.getString('cartProcessingOrder'),
+      ),
+    );
+
+    overlayState.insert(overlayEntry);
+    await controller.forward();
+    overlayEntry.remove();
+    controller.dispose();
+
+    if (!mounted) return;
+    showDialog<void>(
+      context: context,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(Icons.local_shipping, color: Colors.green, size: 40),
+            const SizedBox(height: 12),
+            Text(
+              localization.getString('cartOnTheWayTitle'),
+              style: const TextStyle(fontWeight: FontWeight.w700),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: Text(localization.getString('cartAwesomeButton')),
+          ),
+        ],
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    final localizationService = LocalizationService.instance;
-    final items = ref.watch(cartProvider);
-
+    final localization = LocalizationService.instance;
     return ScreenScaffold(
-      title: localizationService.getString('cart'),
       showBackButton: false,
-      currentIndex: 3,
+      currentIndex: 2,
       centerContent: false,
       contentPadding: EdgeInsets.zero,
-      body: _isLoading
-          ? const LoadingState()
-          : Align(
-              alignment: Alignment.topCenter,
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 780),
-                child: items.isEmpty
-                    ? EmptyState(
-                        title: localizationService.getString('emptyCart'),
-                        message: 'Ø§Ø¨Ø¯Ø£ Ø¨Ø¥Ø¶Ø§ÙØ© Ù…Ù†ØªØ¬Ø§Øª Ø¥Ù„Ù‰ Ø§Ù„Ø³Ù„Ø© Ù„Ø¥ØªÙ…Ø§Ù… Ø·Ù„Ø¨Ùƒ.',
-                        icon: Icons.shopping_cart_outlined,
-                      )
-                    : Column(
-                        children: [
-                          Expanded(
-                            child: ListView.builder(
-                              padding: const EdgeInsets.all(16),
-                              itemCount: items.length,
-                              itemBuilder: (context, index) {
-                                return _buildCartItem(items[index]);
-                              },
-                            ),
-                          ),
-                          _buildCartSummary(items),
-                        ],
-                      ),
-              ),
-            ),
-    );
-  }
+      body: FutureBuilder<List<Product>>(
+        future: _cartProductsFuture,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState != ConnectionState.done) {
+            return const LoadingState();
+          }
 
-  Widget _buildCartItem(CartItem item) {
-    return Card(
-      margin: const EdgeInsets.only(bottom: 12),
-      child: Padding(
-        padding: const EdgeInsets.all(12),
-        child: Row(
-          children: [
-            Container(
-              width: 80,
-              height: 80,
-              decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.surfaceVariant,
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: item.imageUrl == null || item.imageUrl!.isEmpty
-                  ? const Center(child: Icon(Icons.image, size: 30))
-                  : _buildImage(item.imageUrl!),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
+          if (snapshot.hasError) {
+            return PageContainer(
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Text(
-                    item.name,
-                    style: Theme.of(context).textTheme.titleMedium,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
+                  EmptyState(
+                    title: localization.getString('cartUnavailableTitle'),
+                    message: localization.getString('cartUnavailableMessage'),
+                    icon: Icons.shopping_cart_outlined,
                   ),
-                  const SizedBox(height: 4),
-                  if (item.size != null || item.color != null) ...[
-                    Text(
-                      '${item.size ?? ''} ${item.color ?? ''}',
-                      style: Theme.of(context)
-                          .textTheme
-                          .bodySmall
-                          ?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant),
-                    ),
-                    const SizedBox(height: 4),
-                  ],
-                  Row(
-                    children: [
-                      Text(
-                        '${AppConfig.defaultCurrency} ${item.price.toStringAsFixed(0)}',
-                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                              color: Theme.of(context).colorScheme.primary,
-                              fontWeight: FontWeight.bold,
-                            ),
-                      ),
-                      if ((item.originalPrice ?? 0) > item.price) ...[
-                        const SizedBox(width: 8),
-                        Text(
-                          '${AppConfig.defaultCurrency} ${(item.originalPrice ?? 0).toStringAsFixed(0)}',
-                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                decoration: TextDecoration.lineThrough,
-                                color: Theme.of(context).colorScheme.onSurfaceVariant,
-                              ),
-                        ),
-                      ],
-                    ],
+                  const SizedBox(height: 16),
+                  FilledButton(
+                    onPressed: () {
+                      setState(() {
+                        _cartProductsFuture = ProductService().getProducts(
+                          categoryId: 'men',
+                          pageSize: 2,
+                          sortBy: 'latest',
+                        );
+                      });
+                    },
+                    child: Text(localization.getString('retry')),
                   ),
                 ],
               ),
-            ),
-            Column(
+            );
+          }
+
+          final products = snapshot.data ?? const <Product>[];
+          if (products.isEmpty) {
+            return PageContainer(
+              child: EmptyState(
+                title: localization.getString('cartEmptyTitle'),
+                message: localization.getString('cartEmptyMessage'),
+                icon: Icons.shopping_cart_outlined,
+              ),
+            );
+          }
+
+          final totalCost = products.fold<double>(
+            0,
+            (sum, item) => sum + item.price,
+          );
+
+          return PageContainer(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            child: Column(
               children: [
-                IconButton(
-                  icon: const Icon(Icons.remove),
-                  onPressed: item.quantity > 1
-                      ? () => ref
-                          .read(cartProvider.notifier)
-                          .updateQuantity(item.id, item.quantity - 1)
-                      : null,
-                ),
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-                  decoration: BoxDecoration(
-                    border: Border.all(color: Theme.of(context).colorScheme.outline),
-                    borderRadius: BorderRadius.circular(4),
+                Expanded(
+                  child: GridView.builder(
+                    physics: const BouncingScrollPhysics(),
+                    gridDelegate:
+                        const SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: 2,
+                          crossAxisSpacing: 16,
+                          mainAxisSpacing: 16,
+                          childAspectRatio: 0.68,
+                        ),
+                    itemCount: products.length,
+                    itemBuilder: (context, index) => ProductCard(
+                      product: products[index],
+                      onTap: () => context.push(
+                        '${AppRouter.productDetail}/${products[index].id}',
+                      ),
+                    ),
                   ),
-                  child: Text(item.quantity.toString()),
                 ),
-                IconButton(
-                  icon: const Icon(Icons.add),
-                  onPressed: () => ref
-                      .read(cartProvider.notifier)
-                      .updateQuantity(item.id, item.quantity + 1),
+                const SizedBox(height: 20),
+                Card(
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  elevation: 0,
+                  child: Padding(
+                    padding: const EdgeInsets.all(20),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(localization.getString('total')),
+                            Text(
+                              CurrencyUtils.format(totalCost),
+                              style: Theme.of(context).textTheme.titleMedium
+                                  ?.copyWith(fontWeight: FontWeight.bold),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 12),
+                        FilledButton(
+                          onPressed: _handleCheckout,
+                          style: FilledButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(vertical: 16),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(16),
+                            ),
+                          ),
+                          child: Text(localization.getString('checkout')),
+                        ),
+                      ],
+                    ),
+                  ),
                 ),
               ],
             ),
-            IconButton(
-              icon: const Icon(Icons.delete_outline),
-              onPressed: () => _removeItem(item.id),
-            ),
-          ],
-        ),
+          );
+        },
       ),
     );
-  }
-
-  Widget _buildCartSummary(List<CartItem> items) {
-    final localizationService = LocalizationService.instance;
-    final subtotal = items.fold<double>(0, (sum, item) => sum + item.price * item.quantity);
-    final discount = _appliedCoupon != null ? subtotal * 0.1 : 0;
-    final total = subtotal - discount + _deliveryFee;
-
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surface,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.08),
-            blurRadius: 4,
-            offset: const Offset(0, -2),
-          ),
-        ],
-      ),
-      child: Column(
-        children: [
-          Row(
-            children: [
-              Expanded(
-                child: TextField(
-                  decoration: InputDecoration(
-                    hintText: localizationService.getString('couponCode'),
-                    border: const OutlineInputBorder(),
-                    contentPadding:
-                        const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                  ),
-                ),
-              ),
-              const SizedBox(width: 8),
-              ElevatedButton(
-                onPressed: _applyCoupon,
-                child: Text(localizationService.getString('applyCoupon')),
-              ),
-            ],
-          ),
-          const SizedBox(height: 16),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(localizationService.getString('subtotal')),
-              Text('${AppConfig.defaultCurrency} ${subtotal.toStringAsFixed(0)}'),
-            ],
-          ),
-          if (_appliedCoupon != null) ...[
-            const SizedBox(height: 4),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(localizationService.getString('discount')),
-                Text(
-                  '-${AppConfig.defaultCurrency} ${discount.toStringAsFixed(0)}',
-                  style: TextStyle(color: Theme.of(context).colorScheme.error),
-                ),
-              ],
-            ),
-          ],
-          const SizedBox(height: 4),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(localizationService.getString('delivery')),
-              Text('${AppConfig.defaultCurrency} ${_deliveryFee.toStringAsFixed(0)}'),
-            ],
-          ),
-          const Divider(),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                localizationService.getString('total'),
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
-              ),
-              Text(
-                '${AppConfig.defaultCurrency} ${total.toStringAsFixed(0)}',
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: Theme.of(context).colorScheme.primary,
-                    ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 16),
-          SizedBox(
-            width: double.infinity,
-            child: ElevatedButton(
-              onPressed: items.isNotEmpty ? _proceedToCheckout : null,
-              child: Text(localizationService.getString('checkout')),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildImage(String url) {
-    if (url.startsWith('http')) {
-      return Image.network(url, fit: BoxFit.cover, errorBuilder: (_, __, ___) => const Icon(Icons.image));
-    }
-    return Image.asset(url, fit: BoxFit.cover, errorBuilder: (_, __, ___) => const Icon(Icons.image));
-  }
-
-  void _removeItem(String itemId) {
-    ref.read(cartProvider.notifier).removeById(itemId);
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(LocalizationService.instance.getString('productRemovedFromCart')),
-      ),
-    );
-  }
-
-  void _applyCoupon() {
-    setState(() {
-      _appliedCoupon = 'SAVE10';
-    });
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(LocalizationService.instance.getString('couponApplied')),
-      ),
-    );
-  }
-
-  void _proceedToCheckout() {
-    context.go(AppRouter.checkout);
   }
 }
 
+class _CheckoutOverlay extends StatelessWidget {
+  const _CheckoutOverlay({
+    required this.controller,
+    required this.processingLabel,
+  });
+
+  final AnimationController controller;
+  final String processingLabel;
+
+  @override
+  Widget build(BuildContext context) {
+    final animation = CurvedAnimation(
+      parent: controller,
+      curve: Curves.easeInOut,
+    );
+
+    return IgnorePointer(
+      child: AnimatedBuilder(
+        animation: animation,
+        builder: (context, _) {
+          final progress = animation.value;
+          final size = MediaQuery.of(context).size;
+          final circleSize = 100 + (progress * 60);
+          final checkOpacity = progress.clamp(0.6, 1.0);
+
+          return Stack(
+            children: [
+              Opacity(
+                opacity: progress * 0.6,
+                child: Container(color: Colors.black),
+              ),
+              Center(
+                child: Container(
+                  width: circleSize,
+                  height: circleSize,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: Colors.white.withValues(alpha: 0.9),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.2),
+                        blurRadius: 20,
+                      ),
+                    ],
+                  ),
+                  child: Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      SizedBox(
+                        width: circleSize - 24,
+                        height: circleSize - 24,
+                        child: CircularProgressIndicator(
+                          value: progress,
+                          strokeWidth: 6,
+                          valueColor: AlwaysStoppedAnimation<Color>(
+                            Theme.of(context).colorScheme.primary,
+                          ),
+                        ),
+                      ),
+                      Opacity(
+                        opacity: checkOpacity,
+                        child: Icon(
+                          Icons.check_circle,
+                          color: Theme.of(context).colorScheme.primary,
+                          size: circleSize / 2,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              Positioned(
+                bottom: size.height * 0.25,
+                left: 0,
+                right: 0,
+                child: Opacity(
+                  opacity: progress,
+                  child: Text(
+                    processingLabel,
+                    textAlign: TextAlign.center,
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          );
+        },
+      ),
+    );
+  }
+}

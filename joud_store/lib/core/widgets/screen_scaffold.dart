@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import '../localization/localization_service.dart';
 import '../router/app_router.dart';
 import '../theme/app_colors.dart';
 import 'app_shell.dart';
@@ -16,10 +17,13 @@ class ScreenScaffold extends StatelessWidget {
     this.actions,
     this.floatingActionButton,
     this.currentIndex = 0,
-    this.showBottomNav = false,
+    this.showBottomNav = true,
     this.floatingActionButtonLocation = FloatingActionButtonLocation.endFloat,
     this.centerContent = true,
-    this.contentPadding = const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
+    this.contentPadding = const EdgeInsets.symmetric(
+      horizontal: 16,
+      vertical: 24,
+    ),
     this.maxContentWidth = 960,
     this.headerBottom,
     this.showHeader = true,
@@ -33,7 +37,7 @@ class ScreenScaffold extends StatelessWidget {
     this.onCartTap,
     this.onFavoritesTap,
     this.onProfileTap,
-    this.searchHint = 'Search Here',
+    this.searchHint,
   });
 
   final Widget body;
@@ -62,7 +66,7 @@ class ScreenScaffold extends StatelessWidget {
   final VoidCallback? onCartTap;
   final VoidCallback? onFavoritesTap;
   final VoidCallback? onProfileTap;
-  final String searchHint;
+  final String? searchHint;
 
   @override
   Widget build(BuildContext context) {
@@ -80,7 +84,8 @@ class ScreenScaffold extends StatelessWidget {
       floatingActionButton: floatingActionButton,
       floatingActionButtonLocation: floatingActionButtonLocation,
       searchController: searchController,
-      onSearchSubmitted: onSearchSubmitted ?? (query) => _handleSearch(context, query),
+      onSearchSubmitted:
+          onSearchSubmitted ?? (query) => _handleSearch(context, query),
       onSearchIconPressed: onSearchIconPressed,
       onBrandTap: onBrandTap,
       onGlobeTap: onGlobeTap,
@@ -94,14 +99,17 @@ class ScreenScaffold extends StatelessWidget {
 
   Widget _buildBody(BuildContext context) {
     final headlineStyle = Theme.of(context).textTheme.headlineSmall?.copyWith(
-          fontWeight: FontWeight.w700,
-          color: AppColors.textPrimary,
-        );
-    final subtitleStyle = Theme.of(context).textTheme.bodyMedium?.copyWith(
-          color: AppColors.onSurfaceVariant,
-        );
+      fontWeight: FontWeight.w700,
+      color: AppColors.textPrimary,
+    );
+    final subtitleStyle = Theme.of(
+      context,
+    ).textTheme.bodyMedium?.copyWith(color: AppColors.onSurfaceVariant);
 
-    if (title == null && !showBackButton && (actions == null || actions!.isEmpty) && subtitle == null) {
+    if (title == null &&
+        !showBackButton &&
+        (actions == null || actions!.isEmpty) &&
+        subtitle == null) {
       return body;
     }
 
@@ -114,12 +122,11 @@ class ScreenScaffold extends StatelessWidget {
             if (showBackButton)
               IconButton(
                 icon: const Icon(Icons.arrow_back),
-                onPressed: onBackPressed ?? () => Navigator.of(context).maybePop(),
+                onPressed:
+                    onBackPressed ?? () => Navigator.of(context).maybePop(),
               ),
             if (title != null)
-              Expanded(
-                child: Text(title!, style: headlineStyle),
-              )
+              Expanded(child: Text(title!, style: headlineStyle))
             else
               const Spacer(),
             if (actions != null) ...actions!,
@@ -133,7 +140,7 @@ class ScreenScaffold extends StatelessWidget {
           ),
         ],
         const SizedBox(height: 24),
-        body,
+        Expanded(child: body),
       ],
     );
   }
@@ -141,11 +148,12 @@ class ScreenScaffold extends StatelessWidget {
   void _handleSearch(BuildContext context, String query) {
     final trimmed = query.trim();
     if (trimmed.isEmpty) {
+      final localization = LocalizationService.instance;
       ScaffoldMessenger.of(context)
         ..hideCurrentSnackBar()
         ..showSnackBar(
-          const SnackBar(
-            content: Text('Type what you are looking for.'),
+          SnackBar(
+            content: Text(localization.getString('homeSearchPrompt')),
             behavior: SnackBarBehavior.floating,
           ),
         );

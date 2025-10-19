@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../../core/localization/app_localization.dart';
+import '../../../core/localization/localization_service.dart';
+import '../../../core/utils/currency_utils.dart';
 
 /// Settings state
 class SettingsState {
@@ -10,7 +12,7 @@ class SettingsState {
   final bool notificationsEnabled;
   final bool showCurrencyEquivalent;
   final String currency;
-  
+
   SettingsState({
     Locale? locale,
     this.themeMode = ThemeMode.system,
@@ -18,7 +20,7 @@ class SettingsState {
     this.showCurrencyEquivalent = false,
     this.currency = 'SYP',
   }) : locale = locale ?? AppLocalization.defaultLocale;
-  
+
   SettingsState copyWith({
     Locale? locale,
     ThemeMode? themeMode,
@@ -30,7 +32,8 @@ class SettingsState {
       locale: locale ?? this.locale,
       themeMode: themeMode ?? this.themeMode,
       notificationsEnabled: notificationsEnabled ?? this.notificationsEnabled,
-      showCurrencyEquivalent: showCurrencyEquivalent ?? this.showCurrencyEquivalent,
+      showCurrencyEquivalent:
+          showCurrencyEquivalent ?? this.showCurrencyEquivalent,
       currency: currency ?? this.currency,
     );
   }
@@ -41,32 +44,38 @@ class SettingsNotifier extends StateNotifier<SettingsState> {
   SettingsNotifier() : super(SettingsState()) {
     _loadSettings();
   }
-  
+
   static const String _localeKey = 'locale';
   static const String _themeModeKey = 'theme_mode';
   static const String _notificationsKey = 'notifications_enabled';
   static const String _currencyEquivalentKey = 'show_currency_equivalent';
   static const String _currencyKey = 'currency';
-  
+
   Future<void> _loadSettings() async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      
+
       // Load locale
       final localeCode = prefs.getString(_localeKey);
-      final locale = localeCode != null 
+      final locale = localeCode != null
           ? Locale(localeCode.split('_')[0], localeCode.split('_')[1])
           : AppLocalization.defaultLocale;
-      
+
       // Load theme mode
-      final themeModeIndex = prefs.getInt(_themeModeKey) ?? ThemeMode.system.index;
+      final themeModeIndex =
+          prefs.getInt(_themeModeKey) ?? ThemeMode.system.index;
       final themeMode = ThemeMode.values[themeModeIndex];
-      
-      // Load other settings
+
       final notificationsEnabled = prefs.getBool(_notificationsKey) ?? true;
-      final showCurrencyEquivalent = prefs.getBool(_currencyEquivalentKey) ?? false;
-      final currency = prefs.getString(_currencyKey) ?? 'SYP';
-      
+      final showCurrencyEquivalent =
+          prefs.getBool(_currencyEquivalentKey) ?? false;
+      final storedCurrency = prefs.getString(_currencyKey);
+      final currency =
+          storedCurrency ?? CurrencyUtils.currencyCodeForLocale(locale);
+
+      await LocalizationService.instance.loadLocale(locale);
+      CurrencyUtils.setOverrideCurrency(currency);
+
       state = state.copyWith(
         locale: locale,
         themeMode: themeMode,
@@ -79,17 +88,24 @@ class SettingsNotifier extends StateNotifier<SettingsState> {
       state = SettingsState();
     }
   }
-  
+
   Future<void> setLocale(Locale locale) async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      await prefs.setString(_localeKey, '${locale.languageCode}_${locale.countryCode}');
-      state = state.copyWith(locale: locale);
+      await prefs.setString(
+        _localeKey,
+        '${locale.languageCode}_${locale.countryCode}',
+      );
+      final currency = CurrencyUtils.currencyCodeForLocale(locale);
+      await prefs.setString(_currencyKey, currency);
+      await LocalizationService.instance.loadLocale(locale);
+      CurrencyUtils.setOverrideCurrency(currency);
+      state = state.copyWith(locale: locale, currency: currency);
     } catch (e) {
       // Handle error silently
     }
   }
-  
+
   Future<void> setThemeMode(ThemeMode themeMode) async {
     try {
       final prefs = await SharedPreferences.getInstance();
@@ -99,7 +115,7 @@ class SettingsNotifier extends StateNotifier<SettingsState> {
       // Handle error silently
     }
   }
-  
+
   Future<void> setNotificationsEnabled(bool enabled) async {
     try {
       final prefs = await SharedPreferences.getInstance();
@@ -109,7 +125,7 @@ class SettingsNotifier extends StateNotifier<SettingsState> {
       // Handle error silently
     }
   }
-  
+
   Future<void> setShowCurrencyEquivalent(bool show) async {
     try {
       final prefs = await SharedPreferences.getInstance();
@@ -119,12 +135,13 @@ class SettingsNotifier extends StateNotifier<SettingsState> {
       // Handle error silently
     }
   }
-  
+
   Future<void> setCurrency(String currency) async {
     try {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString(_currencyKey, currency);
       state = state.copyWith(currency: currency);
+      CurrencyUtils.setOverrideCurrency(currency);
     } catch (e) {
       // Handle error silently
     }
@@ -132,6 +149,8 @@ class SettingsNotifier extends StateNotifier<SettingsState> {
 }
 
 /// Settings provider
-final settingsProvider = StateNotifierProvider<SettingsNotifier, SettingsState>((ref) {
-  return SettingsNotifier();
-});
+final settingsProvider = StateNotifierProvider<SettingsNotifier, SettingsState>(
+  (ref) {
+    return SettingsNotifier();
+  },
+);

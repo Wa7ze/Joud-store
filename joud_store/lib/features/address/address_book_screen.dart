@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/localization/localization_service.dart';
 import '../../core/widgets/ui_states.dart';
@@ -13,7 +13,7 @@ class AddressBookScreen extends ConsumerWidget {
     return ScreenScaffold(
       title: localizationService.getString('addressBook'),
       showBackButton: true,
-      currentIndex: 4,
+      currentIndex: 3,
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           // TODO: implement add address flow

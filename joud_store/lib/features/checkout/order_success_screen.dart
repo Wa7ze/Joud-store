@@ -1,7 +1,8 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../../core/localization/localization_service.dart';
 import '../../core/router/app_router.dart';
+import '../../core/utils/currency_utils.dart';
 import '../../core/widgets/ui_states.dart';
 
 class OrderSummary {
@@ -29,12 +30,14 @@ class OrderSuccessScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final localization = LocalizationService.instance;
     final textDirection = localization.textDirection;
-    final detailAlign = textDirection == TextDirection.rtl ? TextAlign.right : TextAlign.left;
+    final detailAlign = textDirection == TextDirection.rtl
+        ? TextAlign.right
+        : TextAlign.left;
 
     return ScreenScaffold(
       title: localization.getString('orderSuccessTitle'),
       showBackButton: false,
-      currentIndex: 3,
+      currentIndex: 2,
       centerContent: false,
       contentPadding: EdgeInsets.zero,
       body: Align(
@@ -88,7 +91,7 @@ class OrderSuccessScreen extends StatelessWidget {
                         ? Alignment.centerRight
                         : Alignment.centerLeft,
                     child: Text(
-                      '${localization.getString('orderTotal')}: ${summary!.total.toStringAsFixed(0)} ${localization.getString('currency')}',
+                      '${localization.getString('orderTotal')}: ${CurrencyUtils.format(summary!.total)}',
                       style: Theme.of(context).textTheme.bodyLarge,
                       textAlign: detailAlign,
                     ),
@@ -98,7 +101,7 @@ class OrderSuccessScreen extends StatelessWidget {
                         ? Alignment.centerRight
                         : Alignment.centerLeft,
                     child: Text(
-                      '${localization.getString('deliveryFee')}: ${summary!.deliveryFee.toStringAsFixed(0)} ${localization.getString('currency')}',
+                      '${localization.getString('deliveryFee')}: ${CurrencyUtils.format(summary!.deliveryFee)}',
                       style: Theme.of(context).textTheme.bodyMedium,
                       textAlign: detailAlign,
                     ),

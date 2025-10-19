@@ -1,32 +1,31 @@
-/// Localization configuration and supported locales
 import 'package:flutter/material.dart';
 
+/// Static helpers describing the locales supported by the app.
 class AppLocalization {
   static const List<Locale> supportedLocales = [
     Locale('en', 'US'), // English (US) - Default
     Locale('ar', 'SY'), // Arabic (Syria)
+    Locale('tr', 'TR'), // Turkish
   ];
 
   static const Locale defaultLocale = Locale('en', 'US');
 
   static const Map<String, String> languageNames = {
     'en': 'English',
-    'ar': 'العربية',
+    'ar': 'Arabic',
+    'tr': 'Turkish',
   };
 
   static const Map<String, String> countryNames = {
     'US': 'United States',
-    'SY': 'سوريا',
+    'SY': 'Syria',
+    'TR': 'Turkey',
   };
 
-  // RTL languages
   static const List<String> rtlLanguages = ['ar', 'he', 'fa', 'ur'];
 
-  static bool isRTL(String languageCode) {
-    return rtlLanguages.contains(languageCode);
-  }
+  static bool isRTL(String languageCode) => rtlLanguages.contains(languageCode);
 
-  static TextDirection getTextDirection(String languageCode) {
-    return isRTL(languageCode) ? TextDirection.rtl : TextDirection.ltr;
-  }
+  static TextDirection getTextDirection(String languageCode) =>
+      isRTL(languageCode) ? TextDirection.rtl : TextDirection.ltr;
 }

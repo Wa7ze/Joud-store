@@ -3,12 +3,13 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../models/product.dart';
 import '../services/product_service.dart';
 
-final favoritesProvider =
-    StateNotifierProvider<FavoritesNotifier, Set<String>>((ref) {
-  final notifier = FavoritesNotifier();
-  notifier._init();
-  return notifier;
-});
+final favoritesProvider = StateNotifierProvider<FavoritesNotifier, Set<String>>(
+  (ref) {
+    final notifier = FavoritesNotifier();
+    notifier._init();
+    return notifier;
+  },
+);
 
 class FavoritesNotifier extends StateNotifier<Set<String>> {
   FavoritesNotifier() : super(<String>{});
@@ -40,6 +41,11 @@ class FavoritesNotifier extends StateNotifier<Set<String>> {
   }
 
   bool isFavorite(String productId) => state.contains(productId);
+
+  Future<void> clearAll() async {
+    state = <String>{};
+    await _save(state);
+  }
 }
 
 /// Provider that resolves favorite product ids into concrete product models.

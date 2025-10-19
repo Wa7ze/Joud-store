@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
+import '../localization/localization_service.dart';
 import '../theme/app_colors.dart';
 
 class PrimaryHeader extends StatefulWidget {
@@ -17,7 +18,7 @@ class PrimaryHeader extends StatefulWidget {
     this.onFavoritesTap,
     this.onProfileTap,
     this.onSettingsTap,
-    this.searchHint = 'Search Here',
+    this.searchHint,
     this.showSearchBar = true,
     this.showActionIcons = true,
   });
@@ -32,7 +33,7 @@ class PrimaryHeader extends StatefulWidget {
   final VoidCallback? onFavoritesTap;
   final VoidCallback? onProfileTap;
   final VoidCallback? onSettingsTap;
-  final String searchHint;
+  final String? searchHint;
   final bool showSearchBar;
   final bool showActionIcons;
 
@@ -41,14 +42,14 @@ class PrimaryHeader extends StatefulWidget {
 }
 
 class _PrimaryHeaderState extends State<PrimaryHeader> {
-  static const List<String> _messages = [
-    'Shop exclusive collections for every occasion.',
-    'Get the best deals on your favorite brands.',
-    'Refresh your style with our handpicked selection.',
-    'Discover the latest fashion trends.',
-    'Enjoy fast shipping and unbeatable prices.',
-    'Find statement pieces for every season.',
-    'Elevate your everyday essentials in style.',
+  static const List<String> _messageKeys = [
+    'headerMessage1',
+    'headerMessage2',
+    'headerMessage3',
+    'headerMessage4',
+    'headerMessage5',
+    'headerMessage6',
+    'headerMessage7',
   ];
 
   late final TextEditingController _controller;
@@ -87,7 +88,7 @@ class _PrimaryHeaderState extends State<PrimaryHeader> {
     _bannerTimer?.cancel();
     _bannerTimer = Timer.periodic(const Duration(seconds: 4), (_) {
       setState(() {
-        _messageIndex = (_messageIndex + 1) % _messages.length;
+        _messageIndex = (_messageIndex + 1) % _messageKeys.length;
       });
     });
   }
@@ -108,10 +109,16 @@ class _PrimaryHeaderState extends State<PrimaryHeader> {
                 child: AnimatedSwitcher(
                   duration: const Duration(milliseconds: 450),
                   transitionBuilder: (child, animation) {
-                    final offsetTween = Tween<Offset>(
-                      begin: const Offset(0.0, 0.35),
-                      end: Offset.zero,
-                    ).animate(CurvedAnimation(parent: animation, curve: Curves.easeInOut));
+                    final offsetTween =
+                        Tween<Offset>(
+                          begin: const Offset(0.0, 0.35),
+                          end: Offset.zero,
+                        ).animate(
+                          CurvedAnimation(
+                            parent: animation,
+                            curve: Curves.easeInOut,
+                          ),
+                        );
                     return ClipRect(
                       child: SlideTransition(
                         position: offsetTween,
@@ -120,14 +127,16 @@ class _PrimaryHeaderState extends State<PrimaryHeader> {
                     );
                   },
                   child: Text(
-                    _messages[_messageIndex],
+                    LocalizationService.instance.getString(
+                      _messageKeys[_messageIndex],
+                    ),
                     key: ValueKey(_messageIndex),
                     textAlign: TextAlign.center,
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: Colors.white,
-                          fontWeight: FontWeight.w600,
-                          letterSpacing: 0.4,
-                        ),
+                      color: Colors.white,
+                      fontWeight: FontWeight.w600,
+                      letterSpacing: 0.4,
+                    ),
                   ),
                 ),
               ),
@@ -146,7 +155,10 @@ class _PrimaryHeaderState extends State<PrimaryHeader> {
                     ),
                   ],
                 ),
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 24,
+                  vertical: 16,
+                ),
                 child: LayoutBuilder(
                   builder: (context, constraints) {
                     final width = constraints.maxWidth;
@@ -179,15 +191,22 @@ class _PrimaryHeaderState extends State<PrimaryHeader> {
                               alignment: Alignment.center,
                               child: ConstrainedBox(
                                 constraints: BoxConstraints(
-                                  maxWidth: isUltraCompact ? width : width * 0.92,
+                                  maxWidth: isUltraCompact
+                                      ? width
+                                      : width * 0.92,
                                 ),
                                 child: _SearchField(
                                   controller: _controller,
                                   focusNode: _focusNode,
                                   hasFocus: _hasFocus,
-                                  hintText: widget.searchHint,
+                                  hintText:
+                                      widget.searchHint ??
+                                      LocalizationService.instance.getString(
+                                        'searchPlaceholder',
+                                      ),
                                   onSubmitted: widget.onSearchSubmitted,
-                                  onSearchIconPressed: widget.onSearchIconPressed,
+                                  onSearchIconPressed:
+                                      widget.onSearchIconPressed,
                                 ),
                               ),
                             ),
@@ -214,13 +233,18 @@ class _PrimaryHeaderState extends State<PrimaryHeader> {
                                   controller: _controller,
                                   focusNode: _focusNode,
                                   hasFocus: _hasFocus,
-                                  hintText: widget.searchHint,
+                                  hintText:
+                                      widget.searchHint ??
+                                      LocalizationService.instance.getString(
+                                        'searchPlaceholder',
+                                      ),
                                   onSubmitted: widget.onSearchSubmitted,
-                                  onSearchIconPressed: widget.onSearchIconPressed,
-                                  ),
+                                  onSearchIconPressed:
+                                      widget.onSearchIconPressed,
                                 ),
                               ),
-                            )
+                            ),
+                          )
                         else
                           const Spacer(),
                         if (widget.showActionIcons) ...[
@@ -259,11 +283,11 @@ class _BrandMark extends StatelessWidget {
     final logoText = Text(
       'Joud',
       style: textTheme.headlineSmall?.copyWith(
-            color: AppColors.accent,
-            fontWeight: FontWeight.w900,
-            fontSize: (textTheme.headlineSmall?.fontSize ?? 18) + 6,
-            letterSpacing: 0.8,
-          ),
+        color: AppColors.accent,
+        fontWeight: FontWeight.w900,
+        fontSize: (textTheme.headlineSmall?.fontSize ?? 18) + 6,
+        letterSpacing: 0.8,
+      ),
     );
 
     if (onTap == null) {
@@ -368,9 +392,14 @@ class _SearchField extends StatelessWidget {
           filled: true,
           fillColor: Colors.white,
           hintText: hintText,
-          hintStyle: textTheme.bodyMedium?.copyWith(color: AppColors.textSecondary),
+          hintStyle: textTheme.bodyMedium?.copyWith(
+            color: AppColors.textSecondary,
+          ),
           border: InputBorder.none,
-          contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: 20,
+            vertical: 14,
+          ),
           suffixIcon: IconButton(
             icon: const Icon(Icons.search),
             color: AppColors.icon,

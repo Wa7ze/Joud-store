@@ -4,10 +4,8 @@ import 'package:go_router/go_router.dart';
 
 import '../../core/router/app_router.dart';
 import '../../core/widgets/page_container.dart';
-import '../../core/widgets/screen_scaffold.dart';
 import '../../core/widgets/ui_states.dart';
 import '../../core/widgets/language_picker.dart';
-import '../../core/localization/app_localization.dart';
 import '../../core/localization/localization_service.dart';
 import '../profile/providers/profile_preferences_provider.dart';
 import '../settings/providers/settings_provider.dart';
@@ -23,12 +21,25 @@ class ProfileScreen extends ConsumerWidget {
     'Minimalist',
     'Traditional',
   ];
+  static const Map<String, String> _styleLabelKeys = {
+    'Smart casual': 'profileStyleSmartCasual',
+    'Streetwear': 'profileStyleStreetwear',
+    'Activewear': 'profileStyleActivewear',
+    'Minimalist': 'profileStyleMinimalist',
+    'Traditional': 'profileStyleTraditional',
+  };
   static const List<String> _colorOptions = [
     'Earth tones',
     'Neutrals',
     'Bold colours',
     'Pastels',
   ];
+  static const Map<String, String> _colorLabelKeys = {
+    'Earth tones': 'profileColorEarthTones',
+    'Neutrals': 'profileColorNeutrals',
+    'Bold colours': 'profileColorBoldColours',
+    'Pastels': 'profileColorPastels',
+  };
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -45,10 +56,10 @@ class ProfileScreen extends ConsumerWidget {
       contentPadding: EdgeInsets.zero,
       body: preferencesAsync.when(
         loading: () => const LoadingState(),
-        error: (_, __) => const PageContainer(
+        error: (_, __) => PageContainer(
           child: EmptyState(
-            title: 'We could not load your profile',
-            message: 'Please try again in a moment.',
+            title: localization.getString('profileLoadErrorTitle'),
+            message: localization.getString('profileLoadErrorMessage'),
           ),
         ),
         data: (prefs) => SingleChildScrollView(
@@ -61,12 +72,12 @@ class ProfileScreen extends ConsumerWidget {
                   name: 'Dana Al-Hassan',
                   email: 'dana.hassan@example.sy',
                   phone: '+963 999 123 456',
-                  memberSince: 'Member since 2023',
+                  memberSince: localization.getString('profileMemberSince'),
                 ),
                 const SizedBox(height: 24),
                 _StatsStrip(orders: 12, favorites: 48, vouchers: 3),
                 const SizedBox(height: 24),
-                _SectionTitle('Fit preferences'),
+                _SectionTitle(localization.getString('profileFitPreferences')),
                 _ChipWrap(
                   options: _sizeOptions,
                   isSelected: (value) => prefs.preferredSizes.contains(value),
@@ -75,21 +86,29 @@ class ProfileScreen extends ConsumerWidget {
                       .toggleSize(value),
                 ),
                 const SizedBox(height: 24),
-                _SectionTitle('Style inspiration'),
+                _SectionTitle(
+                  localization.getString('profileStyleInspiration'),
+                ),
                 _ChipWrap(
                   options: _styleOptions,
                   isSelected: (value) => prefs.preferredStyles.contains(value),
                   onToggle: (value) => ref
                       .read(profilePreferencesProvider.notifier)
                       .toggleStyle(value),
+                  labelBuilder: (value) =>
+                      localization.getString(_styleLabelKeys[value] ?? value),
                 ),
                 const SizedBox(height: 24),
-                _SectionTitle('Palette favourites'),
+                _SectionTitle(
+                  localization.getString('profilePaletteFavourites'),
+                ),
                 _ChipWrap(
                   options: _colorOptions,
                   isSelected: (_) => false,
                   onToggle: (_) {},
                   enabled: false,
+                  labelBuilder: (value) =>
+                      localization.getString(_colorLabelKeys[value] ?? value),
                 ),
                 const SizedBox(height: 24),
                 Card(
@@ -99,9 +118,9 @@ class ProfileScreen extends ConsumerWidget {
                     children: [
                       SwitchListTile.adaptive(
                         secondary: const Icon(Icons.dark_mode),
-                        title: const Text('Dark mode'),
-                        subtitle: const Text(
-                          'Switch between light and dark for the entire app.',
+                        title: Text(localization.getString('darkMode')),
+                        subtitle: Text(
+                          localization.getString('profileDarkModeSubtitle'),
                         ),
                         value: settings.themeMode == ThemeMode.dark,
                         onChanged: (value) {
@@ -121,15 +140,19 @@ class ProfileScreen extends ConsumerWidget {
                         subtitle: Text(languageLabel),
                         trailing: const Icon(Icons.arrow_forward_ios, size: 16),
                         onTap: () async {
+                          final messenger = ScaffoldMessenger.of(context);
                           final selected = await LanguagePicker.show(
                             context,
                             selectedLocale,
                           );
+                          if (!context.mounted) {
+                            return;
+                          }
                           if (selected != null && selected != selectedLocale) {
                             await ref
                                 .read(settingsProvider.notifier)
                                 .setLocale(selected);
-                            ScaffoldMessenger.of(context)
+                            messenger
                               ..hideCurrentSnackBar()
                               ..showSnackBar(
                                 SnackBar(
@@ -147,40 +170,52 @@ class ProfileScreen extends ConsumerWidget {
                   ),
                 ),
                 const SizedBox(height: 24),
-                _SectionTitle('Quick links'),
+                _SectionTitle(localization.getString('profileQuickLinks')),
                 _NavigationTile(
                   icon: Icons.favorite_border,
-                  title: 'Saved favourites',
-                  description: '48 pieces you are tracking',
+                  title: localization.getString('profileSavedFavouritesTitle'),
+                  description: localization.getString(
+                    'profileSavedFavouritesDescription',
+                  ),
                   onTap: () => context.push(AppRouter.favorites),
                 ),
                 _NavigationTile(
                   icon: Icons.location_on_outlined,
-                  title: 'Delivery addresses',
-                  description: 'Home • Work • Parents',
+                  title: localization.getString(
+                    'profileDeliveryAddressesTitle',
+                  ),
+                  description: localization.getString(
+                    'profileDeliveryAddressesDescription',
+                  ),
                   onTap: () => context.push(AppRouter.addressBook),
                 ),
                 _NavigationTile(
                   icon: Icons.shopping_bag_outlined,
-                  title: 'Orders & returns',
-                  description: 'Track deliveries and past purchases',
+                  title: localization.getString('profileOrdersReturnsTitle'),
+                  description: localization.getString(
+                    'profileOrdersReturnsDescription',
+                  ),
                   onTap: () => context.push(AppRouter.orders),
                 ),
                 _NavigationTile(
                   icon: Icons.settings_outlined,
-                  title: 'Account settings',
-                  description: 'Password, notifications & currency',
+                  title: localization.getString('profileAccountSettingsTitle'),
+                  description: localization.getString(
+                    'profileAccountSettingsDescription',
+                  ),
                   onTap: () => context.push(AppRouter.settings),
                 ),
                 const SizedBox(height: 16),
                 OutlinedButton.icon(
                   onPressed: () => ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Signed out successfully (mock).'),
+                    SnackBar(
+                      content: Text(
+                        localization.getString('profileSignOutMessage'),
+                      ),
                     ),
                   ),
                   icon: const Icon(Icons.logout),
-                  label: const Text('Sign out'),
+                  label: Text(localization.getString('profileSignOutLabel')),
                   style: OutlinedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(vertical: 14),
                     shape: RoundedRectangleBorder(
@@ -213,6 +248,7 @@ class _HeaderCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final localization = LocalizationService.instance;
 
     return Card(
       elevation: 0,
@@ -251,7 +287,9 @@ class _HeaderCard extends StatelessWidget {
                       FilledButton.icon(
                         onPressed: () {},
                         icon: const Icon(Icons.edit, size: 18),
-                        label: const Text('Edit'),
+                        label: Text(
+                          localization.getString('profileEditButton'),
+                        ),
                       ),
                     ],
                   ),
@@ -293,6 +331,7 @@ class _StatsStrip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final localization = LocalizationService.instance;
 
     Widget buildStat(String label, int value, IconData icon) {
       return Expanded(
@@ -331,11 +370,23 @@ class _StatsStrip extends StatelessWidget {
 
     return Row(
       children: [
-        buildStat('Orders', orders, Icons.receipt_long),
+        buildStat(
+          localization.getString('profileStatsOrders'),
+          orders,
+          Icons.receipt_long,
+        ),
         const SizedBox(width: 12),
-        buildStat('Favorites', favorites, Icons.favorite_outline),
+        buildStat(
+          localization.getString('profileStatsFavorites'),
+          favorites,
+          Icons.favorite_outline,
+        ),
         const SizedBox(width: 12),
-        buildStat('Vouchers', vouchers, Icons.card_giftcard),
+        buildStat(
+          localization.getString('profileStatsVouchers'),
+          vouchers,
+          Icons.card_giftcard,
+        ),
       ],
     );
   }
@@ -363,12 +414,14 @@ class _ChipWrap extends StatelessWidget {
     required this.isSelected,
     required this.onToggle,
     this.enabled = true,
+    this.labelBuilder,
   });
 
   final List<String> options;
   final bool Function(String value) isSelected;
   final ValueChanged<String> onToggle;
   final bool enabled;
+  final String Function(String value)? labelBuilder;
 
   @override
   Widget build(BuildContext context) {
@@ -377,8 +430,9 @@ class _ChipWrap extends StatelessWidget {
       runSpacing: 8,
       children: options.map((option) {
         final selected = isSelected(option);
+        final display = labelBuilder?.call(option) ?? option;
         return ChoiceChip(
-          label: Text(option),
+          label: Text(display),
           selected: selected,
           onSelected: enabled ? (_) => onToggle(option) : null,
         );

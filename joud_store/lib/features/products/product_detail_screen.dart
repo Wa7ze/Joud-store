@@ -1,21 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:sy_store/core/utils/currency_utils.dart';
 import '../../core/localization/localization_service.dart';
 import '../../core/widgets/ui_states.dart';
 import '../../core/router/app_router.dart';
-import '../../core/config/app_config.dart';
 
 class ProductDetailScreen extends ConsumerStatefulWidget {
   final String productId;
-  
-  const ProductDetailScreen({
-    super.key,
-    required this.productId,
-  });
+
+  const ProductDetailScreen({super.key, required this.productId});
 
   @override
-  ConsumerState<ProductDetailScreen> createState() => _ProductDetailScreenState();
+  ConsumerState<ProductDetailScreen> createState() =>
+      _ProductDetailScreenState();
 }
 
 class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
@@ -29,24 +27,19 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
   @override
   Widget build(BuildContext context) {
     final localizationService = LocalizationService.instance;
-    
+
     return Scaffold(
       appBar: AppBar(
         title: Text(localizationService.getString('productDetails')),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.share),
-            onPressed: _shareProduct,
-          ),
+          IconButton(icon: const Icon(Icons.share), onPressed: _shareProduct),
           IconButton(
             icon: Icon(_isInCart ? Icons.favorite : Icons.favorite_border),
             onPressed: _toggleFavorite,
           ),
         ],
       ),
-      body: _isLoading
-          ? const LoadingState()
-          : _buildProductDetails(),
+      body: _isLoading ? const LoadingState() : _buildProductDetails(),
       bottomNavigationBar: _buildBottomBar(),
     );
   }
@@ -58,7 +51,7 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
         children: [
           // Image Gallery
           _buildImageGallery(),
-          
+
           // Product Info
           Padding(
             padding: const EdgeInsets.all(16),
@@ -71,7 +64,7 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                   style: Theme.of(context).textTheme.headlineSmall,
                 ),
                 const SizedBox(height: 8),
-                
+
                 // Rating
                 Row(
                   children: [
@@ -85,27 +78,29 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                   ],
                 ),
                 const SizedBox(height: 16),
-                
+
                 // Price
                 _buildPriceSection(),
+                const SizedBox(height: 16),
+                _buildActionButtons(),
                 const SizedBox(height: 24),
-                
+
                 // Variants
                 _buildVariantsSection(),
                 const SizedBox(height: 24),
-                
+
                 // Quantity
                 _buildQuantitySection(),
                 const SizedBox(height: 24),
-                
+
                 // Description
                 _buildDescriptionSection(),
                 const SizedBox(height: 24),
-                
+
                 // Reviews
                 _buildReviewsSection(),
                 const SizedBox(height: 24),
-                
+
                 // Complete the Look
                 _buildCompleteLookSection(),
               ],
@@ -122,7 +117,7 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
       {'type': 'detail', 'url': 'https://example.com/detail1.jpg'},
       {'type': 'texture', 'url': 'https://example.com/texture.jpg'},
     ];
-    
+
     return Stack(
       children: [
         // Main image viewer
@@ -147,7 +142,7 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                       children: [
                         // Image placeholder
                         const Icon(Icons.image, size: 100),
-                        
+
                         // Image type indicator
                         Positioned(
                           top: 16,
@@ -158,23 +153,32 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                               vertical: 6,
                             ),
                             decoration: BoxDecoration(
-                              color: Theme.of(context).colorScheme.surface.withOpacity(0.8),
+                              color: Theme.of(
+                                context,
+                              ).colorScheme.surface.withOpacity(0.8),
                               borderRadius: BorderRadius.circular(16),
                             ),
                             child: Row(
                               mainAxisSize: MainAxisSize.min,
                               children: [
                                 Icon(
-                                  _getImageTypeIcon(images[index]['type'] as String),
+                                  _getImageTypeIcon(
+                                    images[index]['type'] as String,
+                                  ),
                                   size: 16,
                                   color: Theme.of(context).colorScheme.primary,
                                 ),
                                 const SizedBox(width: 4),
                                 Text(
-                                  _getImageTypeLabel(images[index]['type'] as String),
-                                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                    color: Theme.of(context).colorScheme.onSurface,
+                                  _getImageTypeLabel(
+                                    images[index]['type'] as String,
                                   ),
+                                  style: Theme.of(context).textTheme.bodySmall
+                                      ?.copyWith(
+                                        color: Theme.of(
+                                          context,
+                                        ).colorScheme.onSurface,
+                                      ),
                                 ),
                               ],
                             ),
@@ -188,7 +192,9 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                           child: Container(
                             padding: const EdgeInsets.all(8),
                             decoration: BoxDecoration(
-                              color: Theme.of(context).colorScheme.surface.withOpacity(0.8),
+                              color: Theme.of(
+                                context,
+                              ).colorScheme.surface.withOpacity(0.8),
                               shape: BoxShape.circle,
                             ),
                             child: Icon(
@@ -206,7 +212,7 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
             },
           ),
         ),
-        
+
         // Image indicators
         Positioned(
           bottom: 16,
@@ -230,7 +236,7 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
             ),
           ),
         ),
-        
+
         // Navigation buttons
         if (_selectedImageIndex > 0)
           Positioned(
@@ -249,7 +255,9 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                 icon: Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.surface.withOpacity(0.8),
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.surface.withOpacity(0.8),
                     shape: BoxShape.circle,
                   ),
                   child: Icon(
@@ -277,7 +285,9 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                 icon: Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.surface.withOpacity(0.8),
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.surface.withOpacity(0.8),
                     shape: BoxShape.circle,
                   ),
                   child: Icon(
@@ -338,7 +348,7 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                 ),
               ),
             ),
-            
+
             // Close button
             Positioned(
               top: 16,
@@ -348,7 +358,9 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                 icon: Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.surface.withOpacity(0.8),
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.surface.withOpacity(0.8),
                     shape: BoxShape.circle,
                   ),
                   child: Icon(
@@ -368,7 +380,7 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
     return Row(
       children: [
         Text(
-          '${AppConfig.defaultCurrency} 75,000',
+          CurrencyUtils.format(75000),
           style: Theme.of(context).textTheme.headlineMedium?.copyWith(
             color: Theme.of(context).colorScheme.primary,
             fontWeight: FontWeight.bold,
@@ -376,7 +388,7 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
         ),
         const SizedBox(width: 8),
         Text(
-          '${AppConfig.defaultCurrency} 100,000',
+          CurrencyUtils.format(100000),
           style: Theme.of(context).textTheme.titleMedium?.copyWith(
             decoration: TextDecoration.lineThrough,
             color: Theme.of(context).colorScheme.onSurfaceVariant,
@@ -402,6 +414,31 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
 
   String? _selectedFit;
   String? _selectedStyle;
+
+  Widget _buildActionButtons() {
+    final localizationService = LocalizationService.instance;
+    return Row(
+      children: [
+        Expanded(
+          child: FilledButton(
+            onPressed: () {},
+            child: Text(
+              localizationService.getString('productAddToCartButton'),
+            ),
+          ),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: OutlinedButton(
+            onPressed: () {},
+            child: Text(
+              localizationService.getString('productAddToFavouritesButton'),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
 
   Widget _buildVariantsSection() {
     final attributes = {
@@ -465,7 +502,7 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
           },
         ),
         const SizedBox(height: 16),
-        
+
         // Colors with swatches
         Text(
           attributes['color']!['title'] as String,
@@ -482,7 +519,7 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
           },
         ),
         const SizedBox(height: 16),
-        
+
         // Fit
         Text(
           attributes['fit']!['title'] as String,
@@ -499,7 +536,7 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
           },
         ),
         const SizedBox(height: 16),
-        
+
         // Style
         Text(
           attributes['style']!['title'] as String,
@@ -561,10 +598,7 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
         return FilterChip(
           label: Text(colorData['name']),
           selected: isSelected,
-          avatar: CircleAvatar(
-            backgroundColor: colorData['color'],
-            radius: 8,
-          ),
+          avatar: CircleAvatar(backgroundColor: colorData['color'], radius: 8),
           onSelected: (bool selected) {
             onSelected(selected ? colorData['name'] : null);
           },
@@ -594,16 +628,20 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
           children: [
             IconButton(
               icon: const Icon(Icons.remove),
-              onPressed: _quantity > 1 ? () {
-                setState(() {
-                  _quantity--;
-                });
-              } : null,
+              onPressed: _quantity > 1
+                  ? () {
+                      setState(() {
+                        _quantity--;
+                      });
+                    }
+                  : null,
             ),
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               decoration: BoxDecoration(
-                border: Border.all(color: Theme.of(context).colorScheme.outline),
+                border: Border.all(
+                  color: Theme.of(context).colorScheme.outline,
+                ),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Text(
@@ -644,10 +682,7 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         // Description
-        Text(
-          'الوصف',
-          style: Theme.of(context).textTheme.titleMedium,
-        ),
+        Text('الوصف', style: Theme.of(context).textTheme.titleMedium),
         const SizedBox(height: 8),
         Text(
           'هذا منتج عالي الجودة مصنوع من أفضل المواد. مناسب للاستخدام اليومي ويتميز بالمتانة والجودة العالية. يأتي مع ضمان لمدة سنة واحدة.',
@@ -656,10 +691,7 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
         const SizedBox(height: 24),
 
         // Material Details
-        Text(
-          'تفاصيل المنتج',
-          style: Theme.of(context).textTheme.titleMedium,
-        ),
+        Text('تفاصيل المنتج', style: Theme.of(context).textTheme.titleMedium),
         const SizedBox(height: 8),
         Card(
           elevation: 0,
@@ -685,9 +717,8 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                       Expanded(
                         child: Text(
                           entry.value,
-                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            fontWeight: FontWeight.w500,
-                          ),
+                          style: Theme.of(context).textTheme.bodyMedium
+                              ?.copyWith(fontWeight: FontWeight.w500),
                         ),
                       ),
                     ],
@@ -700,10 +731,7 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
         const SizedBox(height: 24),
 
         // Care Instructions
-        Text(
-          'تعليمات العناية',
-          style: Theme.of(context).textTheme.titleMedium,
-        ),
+        Text('تعليمات العناية', style: Theme.of(context).textTheme.titleMedium),
         const SizedBox(height: 8),
         Card(
           elevation: 0,
@@ -746,10 +774,7 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text(
-              'التقييمات',
-              style: Theme.of(context).textTheme.titleMedium,
-            ),
+            Text('التقييمات', style: Theme.of(context).textTheme.titleMedium),
             TextButton(
               onPressed: () {
                 // Navigate to reviews screen
@@ -759,7 +784,7 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
           ],
         ),
         const SizedBox(height: 8),
-        
+
         // Review Summary
         Row(
           children: [
@@ -769,11 +794,14 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Row(
-                  children: List.generate(5, (index) => Icon(
-                    Icons.star,
-                    size: 16,
-                    color: index < 4 ? Colors.amber : Colors.grey,
-                  )),
+                  children: List.generate(
+                    5,
+                    (index) => Icon(
+                      Icons.star,
+                      size: 16,
+                      color: index < 4 ? Colors.amber : Colors.grey,
+                    ),
+                  ),
                 ),
                 Text('123 تقييم'),
               ],
@@ -781,7 +809,7 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
           ],
         ),
         const SizedBox(height: 16),
-        
+
         // Sample Reviews
         _buildReviewItem('أحمد محمد', 'منتج ممتاز، أنصح به', 5),
         _buildReviewItem('فاطمة علي', 'جودة عالية وسعر مناسب', 4),
@@ -799,9 +827,7 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
           children: [
             Row(
               children: [
-                CircleAvatar(
-                  child: Text(name[0]),
-                ),
+                CircleAvatar(child: Text(name[0])),
                 const SizedBox(width: 8),
                 Expanded(
                   child: Column(
@@ -809,11 +835,14 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                     children: [
                       Text(name, style: Theme.of(context).textTheme.titleSmall),
                       Row(
-                        children: List.generate(5, (index) => Icon(
-                          Icons.star,
-                          size: 14,
-                          color: index < rating ? Colors.amber : Colors.grey,
-                        )),
+                        children: List.generate(
+                          5,
+                          (index) => Icon(
+                            Icons.star,
+                            size: 14,
+                            color: index < rating ? Colors.amber : Colors.grey,
+                          ),
+                        ),
                       ),
                     ],
                   ),
@@ -830,7 +859,7 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
 
   Widget _buildBottomBar() {
     final localizationService = LocalizationService.instance;
-    
+
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -866,11 +895,9 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
   }
 
   void _shareProduct() {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('تم مشاركة المنتج'),
-      ),
-    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text('تم مشاركة المنتج')));
   }
 
   void _toggleFavorite() {
@@ -879,7 +906,9 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
     });
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text(_isInCart ? 'تم إضافة المنتج للمفضلة' : 'تم إزالة المنتج من المفضلة'),
+        content: Text(
+          _isInCart ? 'تم إضافة المنتج للمفضلة' : 'تم إزالة المنتج من المفضلة',
+        ),
       ),
     );
   }
@@ -887,7 +916,9 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
   void _addToCart() {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text(LocalizationService.instance.getString('productAddedToCart')),
+        content: Text(
+          LocalizationService.instance.getString('productAddedToCart'),
+        ),
       ),
     );
   }
@@ -930,9 +961,9 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
           children: [
             Text(
               'أكمل طلتك',
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
+              style: Theme.of(
+                context,
+              ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
             ),
             TextButton(
               onPressed: () {
@@ -982,19 +1013,23 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                                     vertical: 4,
                                   ),
                                   decoration: BoxDecoration(
-                                    color: Theme.of(context).colorScheme.surface.withOpacity(0.8),
+                                    color: Theme.of(
+                                      context,
+                                    ).colorScheme.surface.withOpacity(0.8),
                                     borderRadius: BorderRadius.circular(12),
                                   ),
                                   child: Text(
                                     item['type'] as String,
-                                    style: Theme.of(context).textTheme.bodySmall,
+                                    style: Theme.of(
+                                      context,
+                                    ).textTheme.bodySmall,
                                   ),
                                 ),
                               ),
                             ],
                           ),
                         ),
-                        
+
                         // Product Info
                         Padding(
                           padding: const EdgeInsets.all(8),
@@ -1009,11 +1044,14 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                               ),
                               const SizedBox(height: 4),
                               Text(
-                                '${AppConfig.defaultCurrency} ${(item['price'] as double).toStringAsFixed(0)}',
-                                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                  color: Theme.of(context).colorScheme.primary,
-                                  fontWeight: FontWeight.bold,
-                                ),
+                                CurrencyUtils.format(item['price'] as double),
+                                style: Theme.of(context).textTheme.bodyMedium
+                                    ?.copyWith(
+                                      color: Theme.of(
+                                        context,
+                                      ).colorScheme.primary,
+                                      fontWeight: FontWeight.bold,
+                                    ),
                               ),
                               const SizedBox(height: 8),
                               SizedBox(
@@ -1023,15 +1061,24 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                                     // Add to cart
                                     ScaffoldMessenger.of(context).showSnackBar(
                                       SnackBar(
-                                        content: Text('تم إضافة ${item['title']} إلى السلة'),
+                                        content: Text(
+                                          'تم إضافة ${item['title']} إلى السلة',
+                                        ),
                                       ),
                                     );
                                   },
-                                  icon: const Icon(Icons.add_shopping_cart, size: 16),
+                                  icon: const Icon(
+                                    Icons.add_shopping_cart,
+                                    size: 16,
+                                  ),
                                   label: const Text('أضف للسلة'),
                                   style: FilledButton.styleFrom(
-                                    textStyle: Theme.of(context).textTheme.labelSmall,
-                                    padding: const EdgeInsets.symmetric(vertical: 8),
+                                    textStyle: Theme.of(
+                                      context,
+                                    ).textTheme.labelSmall,
+                                    padding: const EdgeInsets.symmetric(
+                                      vertical: 8,
+                                    ),
                                   ),
                                 ),
                               ),
@@ -1093,7 +1140,7 @@ class SizeGuideSheet extends StatelessWidget {
               ),
             ),
             const Divider(),
-            
+
             // Content
             Expanded(
               child: SingleChildScrollView(
@@ -1129,7 +1176,7 @@ class SizeGuideSheet extends StatelessWidget {
                       Icons.height,
                     ),
                     const SizedBox(height: 24),
-                    
+
                     // Size Table
                     Text(
                       'جدول المقاسات',
@@ -1151,12 +1198,17 @@ class SizeGuideSheet extends StatelessWidget {
                           _buildSizeTableRow('S', '86-90', '68-72', '94-98'),
                           _buildSizeTableRow('M', '90-94', '72-76', '98-102'),
                           _buildSizeTableRow('L', '94-98', '76-80', '102-106'),
-                          _buildSizeTableRow('XL', '98-102', '80-84', '106-110'),
+                          _buildSizeTableRow(
+                            'XL',
+                            '98-102',
+                            '80-84',
+                            '106-110',
+                          ),
                         ],
                       ),
                     ),
                     const SizedBox(height: 24),
-                    
+
                     // Notes
                     Text(
                       'ملاحظات',
@@ -1168,7 +1220,7 @@ class SizeGuideSheet extends StatelessWidget {
                     const Text(
                       '- جميع القياسات بالسنتيمتر\n'
                       '- القياسات تقريبية وقد تختلف حسب التصميم\n'
-                      '- في حال كنت بين مقاسين، ننصح باختيار المقاس الأكبر'
+                      '- في حال كنت بين مقاسين، ننصح باختيار المقاس الأكبر',
                     ),
                   ],
                 ),
@@ -1198,9 +1250,9 @@ class SizeGuideSheet extends StatelessWidget {
               children: [
                 Text(
                   title,
-                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style: Theme.of(
+                    context,
+                  ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold),
                 ),
                 Text(
                   instruction,
@@ -1214,12 +1266,21 @@ class SizeGuideSheet extends StatelessWidget {
     );
   }
 
-  DataRow _buildSizeTableRow(String size, String chest, String waist, String hip) {
-    return DataRow(cells: [
-      DataCell(Text(size, style: const TextStyle(fontWeight: FontWeight.bold))),
-      DataCell(Text(chest)),
-      DataCell(Text(waist)),
-      DataCell(Text(hip)),
-    ]);
+  DataRow _buildSizeTableRow(
+    String size,
+    String chest,
+    String waist,
+    String hip,
+  ) {
+    return DataRow(
+      cells: [
+        DataCell(
+          Text(size, style: const TextStyle(fontWeight: FontWeight.bold)),
+        ),
+        DataCell(Text(chest)),
+        DataCell(Text(waist)),
+        DataCell(Text(hip)),
+      ],
+    );
   }
 }

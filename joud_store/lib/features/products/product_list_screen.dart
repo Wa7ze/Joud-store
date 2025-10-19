@@ -4,6 +4,8 @@ import '../../core/localization/localization_service.dart';
 import '../../core/router/app_router.dart';
 import '../../core/widgets/ui_states.dart';
 import '../../core/widgets/product_card.dart';
+import '../../core/widgets/page_container.dart';
+import '../../core/widgets/screen_scaffold.dart';
 import 'models/product.dart';
 import 'models/product_filters.dart';
 import 'services/product_service.dart';
@@ -121,31 +123,25 @@ class _ProductListScreenState extends State<ProductListScreen> {
     } else {
       content = RefreshIndicator(
         onRefresh: () => _fetch(refresh: true),
-        child: Align(
-          alignment: Alignment.topCenter,
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 780),
-            child: GridView.builder(
-              controller: _scrollController,
-              padding: const EdgeInsets.all(12),
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2,
-                crossAxisSpacing: 12,
-                mainAxisSpacing: 12,
-                childAspectRatio: 0.68,
-              ),
-              itemCount: _products.length + (_isLoadingMore ? 2 : 0),
-              itemBuilder: (context, index) {
-                if (index >= _products.length) {
-                  return const Center(child: CircularProgressIndicator());
-                }
-                final product = _products[index];
-                return ProductCard(
-                  product: product,
-                  onTap: () => context.push('${AppRouter.productDetail}/${product.id}'),
-                );
-              },
+        child: PageContainer(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
+          child: GridView.builder(
+            controller: _scrollController,
+            padding: const EdgeInsets.all(12),
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 2,
+              crossAxisSpacing: 12,
+              mainAxisSpacing: 12,
+              childAspectRatio: 0.68,
             ),
+            itemCount: _products.length + (_isLoadingMore ? 2 : 0),
+            itemBuilder: (context, index) {
+              if (index >= _products.length) {
+                return const Center(child: CircularProgressIndicator());
+              }
+              final product = _products[index];
+              return ProductCard(product: product);
+            },
           ),
         ),
       );
@@ -154,7 +150,7 @@ class _ProductListScreenState extends State<ProductListScreen> {
     return ScreenScaffold(
       title: localizationService.getString('products'),
       showBackButton: true,
-      currentIndex: 1,
+      currentIndex: 0,
       centerContent: false,
       contentPadding: EdgeInsets.zero,
       body: content,

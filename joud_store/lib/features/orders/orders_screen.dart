@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../core/localization/localization_service.dart';
 import '../../core/router/app_router.dart';
 import '../../core/utils/currency_utils.dart';
+import '../../core/widgets/page_container.dart';
 import '../../core/widgets/screen_scaffold.dart';
 import '../../core/widgets/ui_states.dart';
 import '../../core/models/order.dart' as core;
@@ -15,44 +16,45 @@ class OrdersScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final localizationService = LocalizationService.instance;
+    final localization = LocalizationService.instance;
     final ordersAsync = ref.watch(orderHistoryProvider);
 
     return ScreenScaffold(
-      title: localizationService.getString('orders'),
+      title: localization.getString('orders'),
       showBackButton: true,
-      currentIndex: 4,
+      currentIndex: 3,
       centerContent: false,
       contentPadding: EdgeInsets.zero,
       body: ordersAsync.when(
         loading: () => const LoadingState(),
-        error: (_, __) => const EmptyState(
-          title: 'تعذر تحميل الطلبات',
-          message: 'حاول مرةً أخرى لاحقاً.',
-          icon: Icons.warning_amber_rounded,
+        error: (_, __) => PageContainer(
+          child: EmptyState(
+            title: localization.getString('ordersLoadErrorTitle'),
+            message: localization.getString('ordersLoadErrorMessage'),
+            icon: Icons.warning_amber_rounded,
+          ),
         ),
         data: (orders) {
           if (orders.isEmpty) {
-            return const EmptyState(
-              title: 'لا توجد طلبات بعد',
-              message: 'ابدأ التسوق لإضافة أول طلب لك.',
-              icon: Icons.shopping_bag_outlined,
+            return PageContainer(
+              padding: const EdgeInsets.symmetric(vertical: 48),
+              child: EmptyState(
+                title: localization.getString('noOrders'),
+                message: localization.getString('noOrdersMessage'),
+                icon: Icons.shopping_bag_outlined,
+              ),
             );
           }
 
-          return Align(
-            alignment: Alignment.topCenter,
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 780),
-              child: ListView.separated(
-                padding: const EdgeInsets.all(16),
-                itemBuilder: (context, index) {
-                  final order = orders[index];
-                  return _OrderCard(order: order);
-                },
-                separatorBuilder: (_, __) => const SizedBox(height: 12),
-                itemCount: orders.length,
+          return PageContainer(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
+            child: ListView.separated(
+              itemBuilder: (context, index) => _OrderCard(
+                order: orders[index],
+                localization: localization,
               ),
+              separatorBuilder: (_, __) => const SizedBox(height: 16),
+              itemCount: orders.length,
             ),
           );
         },
@@ -62,20 +64,28 @@ class OrdersScreen extends ConsumerWidget {
 }
 
 class _OrderCard extends StatelessWidget {
-  final core.Order order;
+  const _OrderCard({
+    required this.order,
+    required this.localization,
+  });
 
-  const _OrderCard({required this.order});
+  final core.Order order;
+  final LocalizationService localization;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final textAlign = localization.textDirection == TextDirection.rtl
+        ? TextAlign.right
+        : TextAlign.left;
+
     return Card(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: InkWell(
         onTap: () => context.push('${AppRouter.orderDetail}/${order.id}'),
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(16),
         child: Padding(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.all(20),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -83,7 +93,7 @@ class _OrderCard extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(order.id, style: theme.textTheme.titleMedium),
-                  _StatusChip(status: order.orderStatus),
+                  _StatusChip(status: order.orderStatus, localization: localization),
                 ],
               ),
               const SizedBox(height: 8),
@@ -96,26 +106,23 @@ class _OrderCard extends StatelessWidget {
               const SizedBox(height: 12),
               Row(
                 children: [
-                  Icon(
-                    Icons.shopping_bag,
-                    size: 20,
-                    color: theme.colorScheme.primary,
-                  ),
+                  Icon(Icons.shopping_bag,
+                      size: 20, color: theme.colorScheme.primary),
                   const SizedBox(width: 8),
-                  Text('عدد المنتجات: ${order.items.length}'),
+                  Text(
+                    '${localization.getString('orderItemsCount')}: ${order.items.length}',
+                    textAlign: textAlign,
+                  ),
                 ],
               ),
               const SizedBox(height: 8),
               Row(
                 children: [
-                  Icon(
-                    Icons.attach_money,
-                    size: 20,
-                    color: theme.colorScheme.primary,
-                  ),
+                  Icon(Icons.attach_money,
+                      size: 20, color: theme.colorScheme.primary),
                   const SizedBox(width: 8),
                   Text(
-                    '${CurrencyUtils.format(order.total)} (${order.paymentStatus == core.PaymentStatus.paid ? 'مدفوع' : 'قيد الدفع'})',
+                    '${CurrencyUtils.format(order.total)} (${order.paymentStatus == core.PaymentStatus.paid ? localization.getString('orderPaid') : localization.getString('orderPendingPayment')})',
                     style: theme.textTheme.bodyMedium?.copyWith(
                       fontWeight: FontWeight.bold,
                     ),
@@ -138,19 +145,28 @@ class _OrderCard extends StatelessWidget {
 }
 
 class _StatusChip extends StatelessWidget {
-  final core.OrderStatus status;
+  const _StatusChip({
+    required this.status,
+    required this.localization,
+  });
 
-  const _StatusChip({required this.status});
+  final core.OrderStatus status;
+  final LocalizationService localization;
 
   @override
   Widget build(BuildContext context) {
     final colors = Theme.of(context).colorScheme;
     final (label, color) = switch (status) {
-      core.OrderStatus.placed => ('تم الاستلام', colors.primary),
-      core.OrderStatus.confirmed => ('قيد التحضير', colors.secondary),
-      core.OrderStatus.outForDelivery => ('قيد التوصيل', colors.tertiary),
-      core.OrderStatus.delivered => ('تم التسليم', Colors.green),
-      core.OrderStatus.cancelled => ('أُلغي', Colors.redAccent),
+      core.OrderStatus.placed =>
+        (localization.getString('orderPlaced'), colors.primary),
+      core.OrderStatus.confirmed =>
+        (localization.getString('orderConfirmed'), colors.secondary),
+      core.OrderStatus.outForDelivery =>
+        (localization.getString('orderOutForDelivery'), colors.tertiary),
+      core.OrderStatus.delivered =>
+        (localization.getString('orderDelivered'), Colors.green),
+      core.OrderStatus.cancelled =>
+        (localization.getString('orderCancelled'), Colors.redAccent),
     };
 
     return Chip(

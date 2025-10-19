@@ -15,9 +15,6 @@ class SyStoreApp extends ConsumerWidget {
     final settings = ref.watch(settingsProvider);
     final localizationService = LocalizationService.instance;
     
-    // Set locale from settings
-    localizationService.setLocale(settings.locale);
-    
     return MaterialApp.router(
       title: localizationService.getString('appName'),
       debugShowCheckedModeBanner: false,

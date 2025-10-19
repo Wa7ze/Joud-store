@@ -1,10 +1,12 @@
-﻿import 'dart:async';
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../core/localization/localization_service.dart';
 import '../../core/widgets/ui_states.dart';
 import '../../core/router/app_router.dart';
+import '../../core/widgets/page_container.dart';
+import '../../core/widgets/screen_scaffold.dart';
 import '../products/models/product.dart';
 import 'providers/search_provider.dart';
 import 'models/search_suggestion.dart';
@@ -61,8 +63,8 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
       ],
       body: Column(
         children: [
-          Padding(
-            padding: const EdgeInsets.all(16),
+          PageContainer(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
             child: TextField(
               controller: _searchController,
               textDirection: textDirection,
@@ -92,24 +94,24 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
             ),
           ),
           Expanded(
-            child: Align(
-              alignment: Alignment.topCenter,
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 780),
-                child: searchResults.when(
-                  data: (products) => products.isNotEmpty
-                      ? _buildSearchResults(products)
-                      : _buildSearchSuggestions(localizationService),
-                  loading: () => const Padding(
-                    padding: EdgeInsets.only(top: 24),
-                    child: LoadingState(),
-                  ),
-                  error: (_, __) => Center(
-                    child: EmptyState(
-                      title: localizationService.getString('error'),
-                      message: localizationService.getString('searchError'),
-                      icon: Icons.error_outline,
+            child: searchResults.when(
+              data: (products) => products.isNotEmpty
+                  ? PageContainer(
+                      child: _buildSearchResults(products),
+                    )
+                  : PageContainer(
+                      child: _buildSearchSuggestions(localizationService),
                     ),
+              loading: () => const Padding(
+                padding: EdgeInsets.only(top: 24),
+                child: LoadingState(),
+              ),
+              error: (_, __) => PageContainer(
+                child: Center(
+                  child: EmptyState(
+                    title: localizationService.getString('error'),
+                    message: localizationService.getString('searchError'),
+                    icon: Icons.error_outline,
                   ),
                 ),
               ),
@@ -134,10 +136,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
       itemCount: products.length,
       itemBuilder: (context, index) {
         final product = products[index];
-        return ProductCard(
-          product: product,
-          onTap: () => context.go('${AppRouter.productDetail}/${product.id}'),
-        );
+        return ProductCard(product: product);
       },
     );
   }

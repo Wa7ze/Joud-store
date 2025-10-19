@@ -1,289 +1,381 @@
-﻿/// English localization strings
+/// English localization strings stored as a lookup map
 class AppStringsEn {
-  // App
-  static const String appName = 'Syria Store';
-  static const String appDescription = 'Your one-stop shop for all your needs in Syria';
-  static const String language = 'Language';
-  static const String darkMode = 'Dark Mode';
-  static const String currencyDisplay = 'Currency Display';
-  static const String showEquivalent = 'Show Equivalent';
-  static const String notificationsEnabled = 'Enable Notifications';
-  static const String about = 'About';
-  static const String version = 'Version';
-  
-  // Support
-  static const String contactUs = 'Contact Us';
-  static const String whatsapp = 'WhatsApp';
-  static const String call = 'Call';
-  static const String businessHours = 'Business Hours';
-  static const String workingDays = 'Sunday - Thursday';
-  static const String supportMessage = 'Hello, I need help with my order';
-  static const String faq = 'FAQ';
-  
-  // Legal - Terms of Service
-  static const String termsOfServiceTitle = 'Syria Store Terms of Service';
-  static const String termsOfServiceIntro = 'Welcome to Syria Store. By using our services, you agree to these terms and conditions. Please read them carefully.';
-  static const String accountTermsTitle = 'Account Terms';
-  static const String accountTermsContent = 'You must be over 18 years old to create an account. You are responsible for maintaining the confidentiality of your account and password.';
-  static const String purchaseTermsTitle = 'Purchase Terms';
-  static const String purchaseTermsContent = 'When you place an order, you are making an offer to purchase the products. We reserve the right to refuse or cancel any order for any reason.';
-  static const String deliveryTermsTitle = 'Delivery Terms';
-  static const String deliveryTermsContent = 'We provide delivery service throughout Syria. Delivery times are estimates and may vary depending on location and circumstances.';
-  static const String cancellationTermsTitle = 'Cancellation Terms';
-  static const String cancellationTermsContent = 'You may cancel your order before it is shipped. Once shipped, our return policy applies.';
-  static const String privacyTermsTitle = 'Privacy';
-  static const String privacyTermsContent = 'We respect your privacy and protect your personal data according to our Privacy Policy.';
-  static const String changesTermsTitle = 'Changes to Terms';
-  static const String changesTermsContent = 'We reserve the right to update these terms at any time. You will be notified of any material changes.';
-  static const String termsLastUpdated = 'Last updated: October 1, 2025';
-  
-  // Legal - Privacy Policy
-  static const String privacyPolicyTitle = 'Privacy Policy';
-  static const String privacyPolicyIntro = 'We value your privacy and are committed to protecting your personal data. This policy explains how we collect, use, and protect your information.';
-  static const String dataCollectionTitle = 'Data Collection';
-  static const String dataCollectionContent = 'We collect information you provide directly to us, such as your name, address, and contact details, as well as information about your use of the app.';
-  static const String dataUsageTitle = 'Data Usage';
-  static const String dataUsageContent = 'We use your data to provide our services, process your orders, and communicate with you about your orders and our offers.';
-  static const String dataProtectionTitle = 'Data Protection';
-  static const String dataProtectionContent = 'We implement appropriate security measures to protect your data against unauthorized access, alteration, or disclosure.';
-  static const String cookiesTitle = 'Cookies';
-  static const String cookiesContent = 'We use cookies to improve your experience in the app and to personalize content and advertisements.';
-  static const String thirdPartyTitle = 'Third Parties';
-  static const String thirdPartyContent = 'We may share your data with certain service providers to facilitate our services, such as shipping and payment processing companies.';
-  static const String privacyLastUpdated = 'Last updated: October 1, 2025';
-  
-  // Legal - Return Policy
-  static const String returnPolicyTitle = 'Return Policy';
-  static const String returnPolicyIntro = 'We want you to be completely satisfied with your purchases. This policy explains how to return products and receive refunds.';
-  static const String eligibilityTitle = 'Return Eligibility';
-  static const String eligibilityContent = 'Products can be returned within 7 days of receipt, provided they are in their original condition with all tags and packaging.';
-  static const String processTitle = 'Return Process';
-  static const String processContent = 'To initiate a return, please contact customer service. We will arrange for the product to be collected and inspected.';
-  static const String refundsTitle = 'Refunds';
-  static const String refundsContent = 'Once the return is approved, the refund will be processed to your original payment method within 14 business days.';
-  static const String nonReturnableTitle = 'Non-Returnable Items';
-  static const String nonReturnableContent = 'Some items are non-returnable for health and safety reasons, such as opened personal care products.';
-  static const String damagesTitle = 'Damaged Items';
-  static const String damagesContent = 'If you receive a damaged item, please notify us within 24 hours of receipt. We will arrange for a replacement or refund.';
-  static const String returnLastUpdated = 'Last updated: October 1, 2025';
-  
-  // Common
-  static const String loading = 'Loading...';
-  static const String error = 'Error';
-  static const String retry = 'Retry';
-  static const String cancel = 'Cancel';
-  static const String confirm = 'Confirm';
-  static const String save = 'Save';
-  static const String edit = 'Edit';
-  static const String delete = 'Delete';
-  static const String add = 'Add';
-  static const String remove = 'Remove';
-  static const String search = 'Search';
-  static const String filter = 'Filter';
-  static const String sort = 'Sort';
-  static const String clear = 'Clear';
-  static const String apply = 'Apply';
-  static const String next = 'Next';
-  static const String previous = 'Previous';
-  static const String done = 'Done';
-  static const String close = 'Close';
-  static const String back = 'Back';
-  static const String home = 'Home';
-  static const String profile = 'Profile';
-  static const String settings = 'Settings';
-  static const String notifications = 'Notifications';
-  static const String cart = 'Cart';
-  static const String orders = 'Orders';
-  static const String categories = 'Categories';
-  static const String products = 'Products';
-  static const String price = 'Price';
-  static const String quantity = 'Quantity';
-  static const String total = 'Total';
-  static const String subtotal = 'Subtotal';
-  static const String delivery = 'Delivery';
-  static const String discount = 'Discount';
-  static const String coupon = 'Coupon';
-  static const String applyCoupon = 'Apply Coupon';
-  static const String couponCode = 'Coupon Code';
-  static const String validCoupon = 'Valid Coupon';
-  static const String invalidCoupon = 'Invalid Coupon';
-  static const String expiredCoupon = 'Expired Coupon';
-  static const String minOrderAmount = 'Minimum Order Amount';
-  static const String currency = 'SYP';
-  
-  // Navigation
-  static const String splash = 'Splash';
-  static const String login = 'Login';
-  static const String signup = 'Sign Up';
-  static const String forgotPassword = 'Forgot Password';
-  static const String productDetails = 'Product Details';
-  static const String productList = 'Product List';
-  static const String checkout = 'Checkout';
-  static const String addressBook = 'Address Book';
-  static const String orderDetails = 'Order Details';
-  static const String customerSupport = 'Customer Support';
-  static const String termsOfService = 'Terms of Service';
-  static const String privacyPolicy = 'Privacy Policy';
-  static const String returnPolicy = 'Return Policy';
-  
-  // Auth
-  static const String phoneNumber = 'Phone Number';
-  static const String email = 'Email';
-  static const String password = 'Password';
-  static const String confirmPassword = 'Confirm Password';
-  static const String otpCode = 'OTP Code';
-  static const String sendOtp = 'Send OTP';
-  static const String verifyOtp = 'Verify OTP';
-  static const String resendOtp = 'Resend OTP';
-  static const String loginSuccess = 'Login Successful';
-  static const String signupSuccess = 'Sign Up Successful';
-  static const String logout = 'Logout';
-  
-  // Address
-  static const String address = 'Address';
-  static const String governorate = 'Governorate';
-  static const String city = 'City';
-  static const String area = 'Area';
-  static const String street = 'Street';
-  static const String building = 'Building';
-  static const String floor = 'Floor';
-  static const String apartment = 'Apartment';
-  static const String notes = 'Notes';
-  static const String defaultAddress = 'Default Address';
-  static const String addAddress = 'Add Address';
-  static const String editAddress = 'Edit Address';
-  static const String selectAddress = 'Select Address';
-  static const String addressEmptyMessage = 'Tap the add button to save your first address.';
-  
-  // Order
-  static const String orderNumber = 'Order Number';
-  static const String orderDate = 'Order Date';
-  static const String orderStatus = 'Order Status';
-  static const String orderTotal = 'Order Total';
-  static const String paymentMethod = 'Payment Method';
-  static const String paymentStatus = 'Payment Status';
-  static const String deliveryMethod = 'Delivery Method';
-  static const String deliveryDate = 'Delivery Date';
-  static const String deliveryTime = 'Delivery Time';
-  static const String orderPlaced = 'Order Placed';
-  static const String orderConfirmed = 'Order Confirmed';
-  static const String orderShipped = 'Order Shipped';
-  static const String orderDelivered = 'Order Delivered';
-  static const String orderCancelled = 'Order Cancelled';
-  static const String cashOnDelivery = 'Cash on Delivery';
-  static const String placeOrder = 'Place Order';
-  static const String orderSuccess = 'Order Placed Successfully';
-  static const String orderSuccessTitle = 'Order Success';
-  static const String orderSuccessHeadline = 'Thank you! Your order is confirmed and now being prepared.';
-  static const String orderSuccessFallback = 'We can’t show the order details right now, but you can track everything from the Orders tab.';
-  static const String orderItemsCount = 'Items count';
-  static const String deliveryFee = 'Delivery fee';
-  static const String orderPlacedAt = 'Order placed on';
-  static const String viewOrders = 'View orders';
-  static const String backToHome = 'Back to home';
-  
-  // Syria Governorates
-  static const String damascus = 'Damascus';
-  static const String aleppo = 'Aleppo';
-  static const String homs = 'Homs';
-  static const String latakia = 'Latakia';
-  static const String hama = 'Hama';
-  static const String deirEzZor = 'Deir ez-Zor';
-  static const String raqqa = 'Raqqa';
-  static const String hasaka = 'Hasaka';
-  static const String tartus = 'Tartus';
-  static const String idlib = 'Idlib';
-  static const String quneitra = 'Quneitra';
-  static const String daraa = 'Daraa';
-  static const String sweida = 'Sweida';
-  
-  // FAQ & Support
-  static const String faqDeliveryTime = 'How long does delivery take?';
-  static const String faqDeliveryTimeAnswer = 'Delivery typically takes 2-3 working days within Damascus, and 4-7 days for other governorates.';
-  static const String faqPaymentMethods = 'What payment methods are available?';
-  static const String faqPaymentMethodsAnswer = 'We currently accept only cash on delivery. We are working on adding electronic payment methods soon.';
-  static const String faqReturnPolicy = 'What is the return policy?';
-  static const String faqReturnPolicyAnswer = 'You can return the product within 7 days of receipt if it has a manufacturing defect or was damaged during shipping.';
-  static const String chat = 'Chat';
-  static const String send = 'Send';
-  
-  // Errors
-  static const String networkError = 'Network Error';
-  static const String serverError = 'Server Error';
-  static const String unknownError = 'Unknown Error';
-  static const String validationError = 'Validation Error';
-  static const String notFound = 'Not Found';
-  static const String unauthorized = 'Unauthorized';
-  static const String forbidden = 'Forbidden';
-  static const String timeout = 'Connection Timeout';
-  static const String offline = 'Offline';
-  static const String noInternetConnection = 'No Internet Connection';
-  
-  // Empty states
-  static const String noProducts = 'No Products';
-  static const String noOrders = 'No Orders';
-  static const String noNotifications = 'No Notifications';
-  static const String noAddresses = 'No Addresses';
-  static const String noCoupons = 'No Coupons';
-  static const String noSearchResults = 'No Search Results';
-  static const String emptyCart = 'Cart is Empty';
-  
-  // Success messages
-  static const String productAddedToCart = 'Product Added to Cart';
-  static const String productRemovedFromCart = 'Product Removed from Cart';
-  static const String addressAdded = 'Address Added';
-  static const String addressUpdated = 'Address Updated';
-  static const String addressDeleted = 'Address Deleted';
-  static const String couponApplied = 'Coupon Applied';
-  static const String settingsSaved = 'Settings Saved';
-  
-  // Settings
-  static const String currencyEquivalent = 'Show price in approximate USD';
-  static const String languageComingSoon = 'Language switcher is coming soon.';
-  static const String aboutDescription = 'Joud Store is a Syrian fashion platform offering the latest styles with reliable delivery.';
-  
-  // Checkout
-  static const String checkoutStepAddress = 'Shipping Address';
-  static const String checkoutStepDelivery = 'Delivery Options';
-  static const String checkoutStepPayment = 'Payment Method';
-  static const String checkoutStepReview = 'Review Order';
-  static const String checkoutAddressTitle = 'Delivery address details';
-  static const String checkoutAddressDescription = 'Select or add a delivery address so we can ship your order to the right place.';
-  static const String checkoutDeliveryTitle = 'Choose delivery method';
-  static const String checkoutDeliveryDescription = 'Pick the delivery option that suits you best and review any extra fees or timing before confirming.';
-  static const String checkoutPaymentTitle = 'Select payment method';
-  static const String checkoutPaymentDescription = 'We currently support cash on delivery. Online payment methods are coming soon.';
-  static const String checkoutReviewTitle = 'Order summary';
-  static const String checkoutSubtotalLabel = 'Items total';
-  static const String checkoutDeliveryFeeLabel = 'Delivery fee';
-  static const String checkoutTotalLabel = 'Amount due';
-  static const String checkoutEmptyMessage = 'Your cart is empty. Add items to continue to checkout.';
-  
-  // Search
-  static const String searchTrending = 'Trending searches';
-  static const String searchRecent = 'Recent searches';
-  static const String searchClearHistory = 'Clear search history';
-  static const String searchPlaceholder = 'Search for products, categories, or brands...';
-  static const String searchError = 'We couldn’t load search results. Please try again.';
-  static const String searchSuggestions = 'Search suggestions';
-  static const String trendSpringFreshLayers = 'Light spring dresses';
-  static const String trendSpringRamadanLooks = 'Ramadan outfits';
-  static const String trendSpringLightFabrics = 'Breathable spring fabrics';
-  static const String trendSummerLinen = 'Summer linen sets';
-  static const String trendSummerBeachwear = 'Beachwear';
-  static const String trendSummerEvening = 'Summer evening dresses';
-  static const String trendFallLayers = 'Cozy fall layers';
-  static const String trendFallEarthTones = 'Earth-tone outfits';
-  static const String trendFallBackToSchool = 'Back-to-school looks';
-  static const String trendWinterCoats = 'Winter coats';
-  static const String trendWinterKnitwear = 'Warm knitwear';
-  static const String trendWinterAccessories = 'Winter accessories';
-  static const String trendStyleCasual = 'Everyday chic';
-  static const String trendStyleEvening = 'Evening gowns';
-  static const String trendStyleModest = 'Modest fashion';
-  static const String trendStyleKids = 'Kidswear';
-  static const String trendOccasionWork = 'Workwear';
-  static const String trendOccasionWedding = 'Wedding guest looks';
-  static const String trendOccasionUniversity = 'Campus outfits';
-  static const String trendOccasionFamily = 'Family gatherings';
+  static const Map<String, String> values = {
+    'appName': "Syria Store",
+    'appDescription': "Your one-stop shop for all your needs in Syria",
+    'headerMessage1': "Shop exclusive collections for every occasion.",
+    'headerMessage2': "Get the best deals on your favorite brands.",
+    'headerMessage3': "Refresh your style with our handpicked selection.",
+    'headerMessage4': "Discover the latest fashion trends.",
+    'headerMessage5': "Enjoy fast shipping and unbeatable prices.",
+    'headerMessage6': "Find statement pieces for every season.",
+    'headerMessage7': "Elevate your everyday essentials in style.",
+    'language': "Language",
+    'darkMode': "Dark Mode",
+    'currencyDisplay': "Currency Display",
+    'showEquivalent': "Show Equivalent",
+    'notificationsEnabled': "Enable Notifications",
+    'about': "About",
+    'version': "Version",
+    'contactUs': "Contact Us",
+    'whatsapp': "WhatsApp",
+    'call': "Call",
+    'businessHours': "Business Hours",
+    'workingDays': "Sunday - Thursday",
+    'supportMessage': "Hello, I need help with my order",
+    'faq': "FAQ",
+    'termsOfServiceTitle': "Syria Store Terms of Service",
+    'termsOfServiceIntro':
+        "Welcome to Syria Store. By using our services, you agree to these terms and conditions. Please read them carefully.",
+    'accountTermsTitle': "Account Terms",
+    'accountTermsContent':
+        "You must be over 18 years old to create an account. You are responsible for maintaining the confidentiality of your account and password.",
+    'purchaseTermsTitle': "Purchase Terms",
+    'purchaseTermsContent':
+        "When you place an order, you are making an offer to purchase the products. We reserve the right to refuse or cancel any order for any reason.",
+    'deliveryTermsTitle': "Delivery Terms",
+    'deliveryTermsContent':
+        "We provide delivery service throughout Syria. Delivery times are estimates and may vary depending on location and circumstances.",
+    'cancellationTermsTitle': "Cancellation Terms",
+    'cancellationTermsContent':
+        "You may cancel your order before it is shipped. Once shipped, our return policy applies.",
+    'privacyTermsTitle': "Privacy",
+    'privacyTermsContent':
+        "We respect your privacy and protect your personal data according to our Privacy Policy.",
+    'changesTermsTitle': "Changes to Terms",
+    'changesTermsContent':
+        "We reserve the right to update these terms at any time. You will be notified of any material changes.",
+    'termsLastUpdated': "Last updated: October 1, 2025",
+    'privacyPolicyTitle': "Privacy Policy",
+    'privacyPolicyIntro':
+        "We value your privacy and are committed to protecting your personal data. This policy explains how we collect, use, and protect your information.",
+    'dataCollectionTitle': "Data Collection",
+    'dataCollectionContent':
+        "We collect information you provide directly to us, such as your name, address, and contact details, as well as information about your use of the app.",
+    'dataUsageTitle': "Data Usage",
+    'dataUsageContent':
+        "We use your data to provide our services, process your orders, and communicate with you about your orders and our offers.",
+    'dataProtectionTitle': "Data Protection",
+    'dataProtectionContent':
+        "We implement appropriate security measures to protect your data against unauthorized access, alteration, or disclosure.",
+    'cookiesTitle': "Cookies",
+    'cookiesContent':
+        "We use cookies to improve your experience in the app and to personalize content and advertisements.",
+    'thirdPartyTitle': "Third Parties",
+    'thirdPartyContent':
+        "We may share your data with certain service providers to facilitate our services, such as shipping and payment processing companies.",
+    'privacyLastUpdated': "Last updated: October 1, 2025",
+    'returnPolicyTitle': "Return Policy",
+    'returnPolicyIntro':
+        "We want you to be completely satisfied with your purchases. This policy explains how to return products and receive refunds.",
+    'eligibilityTitle': "Return Eligibility",
+    'eligibilityContent':
+        "Products can be returned within 7 days of receipt, provided they are in their original condition with all tags and packaging.",
+    'processTitle': "Return Process",
+    'processContent':
+        "To initiate a return, please contact customer service. We will arrange for the product to be collected and inspected.",
+    'refundsTitle': "Refunds",
+    'refundsContent':
+        "Once the return is approved, the refund will be processed to your original payment method within 14 business days.",
+    'nonReturnableTitle': "Non-Returnable Items",
+    'nonReturnableContent':
+        "Some items are non-returnable for health and safety reasons, such as opened personal care products.",
+    'damagesTitle': "Damaged Items",
+    'damagesContent':
+        "If you receive a damaged item, please notify us within 24 hours of receipt. We will arrange for a replacement or refund.",
+    'returnLastUpdated': "Last updated: October 1, 2025",
+    'loading': "Loading...",
+    'error': "Error",
+    'retry': "Retry",
+    'cancel': "Cancel",
+    'confirm': "Confirm",
+    'save': "Save",
+    'edit': "Edit",
+    'delete': "Delete",
+    'add': "Add",
+    'remove': "Remove",
+    'search': "Search",
+    'filter': "Filter",
+    'sort': "Sort",
+    'clear': "Clear",
+    'apply': "Apply",
+    'next': "Next",
+    'previous': "Previous",
+    'done': "Done",
+    'close': "Close",
+    'back': "Back",
+    'home': "Home",
+    'profile': "Profile",
+    'profileLoadErrorTitle': "We could not load your profile",
+    'profileLoadErrorMessage': "Please try again in a moment.",
+    'profileMemberSince': "Member since 2023",
+    'profileStatsOrders': "Orders",
+    'profileStatsFavorites': "Favorites",
+    'profileStatsVouchers': "Vouchers",
+    'profileFitPreferences': "Fit preferences",
+    'profileStyleInspiration': "Style inspiration",
+    'profilePaletteFavourites': "Palette favourites",
+    'profileStyleSmartCasual': "Smart casual",
+    'profileStyleStreetwear': "Streetwear",
+    'profileStyleActivewear': "Activewear",
+    'profileStyleMinimalist': "Minimalist",
+    'profileStyleTraditional': "Traditional",
+    'profileColorEarthTones': "Earth tones",
+    'profileColorNeutrals': "Neutrals",
+    'profileColorBoldColours': "Bold colours",
+    'profileColorPastels': "Pastels",
+    'profileDarkModeSubtitle': "Switch between light and dark for the entire app.",
+    'profileQuickLinks': "Quick links",
+    'profileEditButton': "Edit",
+    'profileSavedFavouritesTitle': "Saved favourites",
+    'profileSavedFavouritesDescription': "48 pieces you are tracking",
+    'profileDeliveryAddressesTitle': "Delivery addresses",
+    'profileDeliveryAddressesDescription': "Home / Work / Parents",
+    'profileOrdersReturnsTitle': "Orders & returns",
+    'profileOrdersReturnsDescription': "Track deliveries and past purchases",
+    'profileAccountSettingsTitle': "Account settings",
+    'profileAccountSettingsDescription': "Password, notifications & currency",
+    'profileSignOutLabel': "Sign out",
+    'profileSignOutMessage': "Signed out successfully (mock).",
+    'currencyNameSYP': "Syrian Pound",
+    'currencyNameUSD': "US Dollar",
+    'currencyNameTRY': "Turkish Lira",
+    'homeCurrencyButtonLabel': "Change currency",
+    'homeCurrencySheetTitle': "Choose currency",
+    'homeCurrencySheetSubtitle': "Display product prices in your preferred currency.",
+    'homeCurrencySheetCancel': "Cancel",
+    'settings': "Settings",
+    'notifications': "Notifications",
+    'globalPreferencesComingSoon': "Global preferences coming soon.",
+    'currencySelectionComingSoon': "Currency selection coming soon.",
+    'comingSoonGeneric': "Coming soon. Stay tuned!",
+    'cart': "Cart",
+    'cartUnavailableTitle': "Cart temporarily unavailable",
+    'cartUnavailableMessage': "Please try again in a moment.",
+    'cartEmptyTitle': "Your cart is empty",
+    'cartEmptyMessage': "Add some products to get started.",
+    'cartOnTheWayTitle': "On the way",
+    'cartAwesomeButton': "Awesome!",
+    'cartProcessingOrder': "Processing order...",
+    'orders': "Orders",
+    'categories': "Categories",
+    'categoryWomen': "Women",
+    'categoryMen': "Men",
+    'categoryBoys': "Boys",
+    'categoryGirls': "Girls",
+    'categoryBaby': "Baby",
+    'categoryBeauty': "Beauty",
+    'categoryGifts': "Gifts",
+    'products': "Products",
+    'favorites': "Favorites",
+    'favoritesUnavailableTitle': "Favorites unavailable",
+    'favoritesUnavailableMessage':
+        "We ran into a problem loading your favorites.",
+    'favoritesHeaderSubtitleEmpty':
+        "Keep exploring and save pieces you love for quick access.",
+    'favoritesHeaderSubtitleSingular': "You have {count} saved piece.",
+    'favoritesHeaderSubtitlePlural': "You have {count} saved pieces.",
+    'favoritesClearConfirmTitle': "Clear favorites?",
+    'favoritesClearConfirmMessage':
+        "This will remove every saved product from your favorites list.",
+    'favoritesExploreButton': "Explore home",
+    'favoritesClearButton': "Clear all",
+    'favoritesEmptyTitle': "No favorites yet",
+    'favoritesEmptyMessage':
+        "Tap the heart on any product to save it here. We picked some ideas to get you started.",
+    'favoritesSuggestionsTitle': "You might also like",
+    'favoritesSuggestionsOfflineTitle': "Recommendations offline",
+    'favoritesSuggestionsOfflineMessage':
+        "Pull to refresh to try loading suggestions again.",
+    'favoritesSuggestionsEmptyTitle': "Nothing to show right now",
+    'favoritesSuggestionsEmptyMessage':
+        "Check back soon for fresh picks tailored to your taste.",
+    'price': "Price",
+    'quantity': "Quantity",
+    'total': "Total",
+    'subtotal': "Subtotal",
+    'delivery': "Delivery",
+    'discount': "Discount",
+    'coupon': "Coupon",
+    'applyCoupon': "Apply Coupon",
+    'couponCode': "Coupon Code",
+    'validCoupon': "Valid Coupon",
+    'invalidCoupon': "Invalid Coupon",
+    'expiredCoupon': "Expired Coupon",
+    'minOrderAmount': "Minimum Order Amount",
+    'currency': "SYP",
+    'splash': "Splash",
+    'login': "Login",
+    'signup': "Sign Up",
+    'forgotPassword': "Forgot Password",
+    'productDetails': "Product Details",
+    'productList': "Product List",
+    'checkout': "Checkout",
+    'addressBook': "Address Book",
+    'orderDetails': "Order Details",
+    'customerSupport': "Customer Support",
+    'termsOfService': "Terms of Service",
+    'privacyPolicy': "Privacy Policy",
+    'returnPolicy': "Return Policy",
+    'phoneNumber': "Phone Number",
+    'email': "Email",
+    'password': "Password",
+    'confirmPassword': "Confirm Password",
+    'otpCode': "OTP Code",
+    'sendOtp': "Send OTP",
+    'verifyOtp': "Verify OTP",
+    'resendOtp': "Resend OTP",
+    'loginSuccess': "Login Successful",
+    'signupSuccess': "Sign Up Successful",
+    'logout': "Logout",
+    'address': "Address",
+    'governorate': "Governorate",
+    'city': "City",
+    'area': "Area",
+    'street': "Street",
+    'building': "Building",
+    'floor': "Floor",
+    'apartment': "Apartment",
+    'notes': "Notes",
+    'defaultAddress': "Default Address",
+    'addAddress': "Add Address",
+    'editAddress': "Edit Address",
+    'selectAddress': "Select Address",
+    'addressEmptyMessage': "Tap the add button to save your first address.",
+    'orderNumber': "Order Number",
+    'orderDate': "Order Date",
+    'orderStatus': "Order Status",
+    'orderTotal': "Order Total",
+    'paymentMethod': "Payment Method",
+    'paymentStatus': "Payment Status",
+    'deliveryMethod': "Delivery Method",
+    'deliveryDate': "Delivery Date",
+    'deliveryTime': "Delivery Time",
+    'orderPlaced': "Order Placed",
+    'orderConfirmed': "Order Confirmed",
+    'orderShipped': "Order Shipped",
+    'orderDelivered': "Order Delivered",
+    'orderCancelled': "Order Cancelled",
+    'cashOnDelivery': "Cash on Delivery",
+    'placeOrder': "Place Order",
+    'orderSuccess': "Order Placed Successfully",
+    'orderSuccessTitle': "Order Success",
+    'orderSuccessHeadline':
+        "Thank you! Your order is confirmed and now being prepared.",
+    'orderSuccessFallback':
+        "We can't show the order details right now, but you can track everything from the Orders tab.",
+    'ordersLoadErrorTitle': "Unable to load orders",
+    'ordersLoadErrorMessage': "Please check your connection and try again.",
+    'noOrdersMessage': "Start shopping to add your first order.",
+    'orderItemsCount': "Items",
+    'deliveryFee': "Delivery fee",
+    'orderPaid': "Paid",
+    'orderPendingPayment': "Pending",
+    'orderPlacedAt': "Order placed on",
+    'viewOrders': "View orders",
+    'backToHome': "Back to home",
+    'damascus': "Damascus",
+    'aleppo': "Aleppo",
+    'homs': "Homs",
+    'latakia': "Latakia",
+    'hama': "Hama",
+    'deirEzZor': "Deir ez-Zor",
+    'raqqa': "Raqqa",
+    'hasaka': "Hasaka",
+    'tartus': "Tartus",
+    'idlib': "Idlib",
+    'quneitra': "Quneitra",
+    'daraa': "Daraa",
+    'sweida': "Sweida",
+    'faqDeliveryTime': "How long does delivery take?",
+    'faqDeliveryTimeAnswer':
+        "Delivery typically takes 2-3 working days within Damascus, and 4-7 days for other governorates.",
+    'faqPaymentMethods': "What payment methods are available?",
+    'faqPaymentMethodsAnswer':
+        "We currently accept only cash on delivery. We are working on adding electronic payment methods soon.",
+    'faqReturnPolicy': "What is the return policy?",
+    'faqReturnPolicyAnswer':
+        "You can return the product within 7 days of receipt if it has a manufacturing defect or was damaged during shipping.",
+    'chat': "Chat",
+    'send': "Send",
+    'networkError': "Network Error",
+    'serverError': "Server Error",
+    'unknownError': "Unknown Error",
+    'validationError': "Validation Error",
+    'notFound': "Not Found",
+    'unauthorized': "Unauthorized",
+    'forbidden': "Forbidden",
+    'timeout': "Connection Timeout",
+    'offline': "Offline",
+    'noInternetConnection': "No Internet Connection",
+    'noProducts': "No Products",
+    'noOrders': "No Orders",
+    'noNotifications': "No Notifications",
+    'noAddresses': "No Addresses",
+    'noCoupons': "No Coupons",
+    'noSearchResults': "No Search Results",
+    'emptyCart': "Cart is Empty",
+    'productAddedToCart': "Product Added to Cart",
+    'productRemovedFromCart': "Product Removed from Cart",
+    'productAddToCartButton': "Add to Cart",
+    'productAddToFavouritesButton': "Add to Favourites",
+    'addressAdded': "Address Added",
+    'addressUpdated': "Address Updated",
+    'addressDeleted': "Address Deleted",
+    'couponApplied': "Coupon Applied",
+    'settingsSaved': "Settings Saved",
+    'currencyEquivalent': "Show price in approximate USD",
+    'languageComingSoon': "Language switcher is coming soon.",
+    'aboutDescription':
+        "Joud Store is a Syrian fashion platform offering the latest styles with reliable delivery.",
+    'checkoutStepAddress': "Shipping Address",
+    'checkoutStepDelivery': "Delivery Options",
+    'checkoutStepPayment': "Payment Method",
+    'checkoutStepReview': "Review Order",
+    'checkoutAddressTitle': "Delivery address details",
+    'checkoutAddressDescription':
+        "Select or add a delivery address so we can ship your order to the right place.",
+    'checkoutDeliveryTitle': "Choose delivery method",
+    'checkoutDeliveryDescription':
+        "Pick the delivery option that suits you best and review any extra fees or timing before confirming.",
+    'checkoutPaymentTitle': "Select payment method",
+    'checkoutPaymentDescription':
+        "We currently support cash on delivery. Online payment methods are coming soon.",
+    'checkoutReviewTitle': "Order summary",
+    'checkoutSubtotalLabel': "Items total",
+    'checkoutDeliveryFeeLabel': "Delivery fee",
+    'checkoutTotalLabel': "Amount due",
+    'checkoutEmptyMessage':
+        "Your cart is empty. Add items to continue to checkout.",
+    'searchTrending': "Trending searches",
+    'searchRecent': "Recent searches",
+    'searchClearHistory': "Clear search history",
+    'searchPlaceholder': "Search for products, categories, or brands...",
+    'searchHintCompact': "Search here",
+    'homeSearchPrompt': "Start typing to discover new looks.",
+    'searchError': "We couldn't load search results. Please try again.",
+    'searchSuggestions': "Search suggestions",
+    'trendSpringFreshLayers': "Light spring dresses",
+    'trendSpringRamadanLooks': "Ramadan outfits",
+    'trendSpringLightFabrics': "Breathable spring fabrics",
+    'trendSummerLinen': "Summer linen sets",
+    'trendSummerBeachwear': "Beachwear",
+    'trendSummerEvening': "Summer evening dresses",
+    'trendFallLayers': "Cozy fall layers",
+    'trendFallEarthTones': "Earth-tone outfits",
+    'trendFallBackToSchool': "Back-to-school looks",
+    'trendWinterCoats': "Winter coats",
+    'trendWinterKnitwear': "Warm knitwear",
+    'trendWinterAccessories': "Winter accessories",
+    'trendStyleCasual': "Everyday chic",
+    'trendStyleEvening': "Evening gowns",
+    'trendStyleModest': "Modest fashion",
+    'trendStyleKids': "Kidswear",
+    'trendOccasionWork': "Workwear",
+    'trendOccasionWedding': "Wedding guest looks",
+    'trendOccasionUniversity': "Campus outfits",
+    'trendOccasionFamily': "Family gatherings",
+  };
+
+  static String get(String key) => values[key] ?? key;
 }

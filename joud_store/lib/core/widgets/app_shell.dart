@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import '../localization/localization_service.dart';
 import '../router/app_router.dart';
-import '../theme/app_colors.dart';
 import 'primary_header.dart';
 
 class AppShell extends StatelessWidget {
@@ -14,7 +14,10 @@ class AppShell extends StatelessWidget {
     this.showSearchBar = true,
     this.showHeaderActions = false,
     this.centerContent = true,
-    this.contentPadding = const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+    this.contentPadding = const EdgeInsets.symmetric(
+      horizontal: 16,
+      vertical: 16,
+    ),
     this.maxContentWidth = 960,
     this.floatingActionButton,
     this.floatingActionButtonLocation = FloatingActionButtonLocation.endFloat,
@@ -30,7 +33,7 @@ class AppShell extends StatelessWidget {
     this.onFavoritesTap,
     this.onProfileTap,
     this.onSettingsTap,
-    this.searchHint = 'Search Here',
+    this.searchHint,
   });
 
   final Widget body;
@@ -56,15 +59,22 @@ class AppShell extends StatelessWidget {
   final VoidCallback? onFavoritesTap;
   final VoidCallback? onProfileTap;
   final VoidCallback? onSettingsTap;
-  final String searchHint;
+  final String? searchHint;
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final localization = LocalizationService.instance;
+    final effectiveSearchHint =
+        searchHint ?? localization.getString('searchPlaceholder');
+
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: theme.scaffoldBackgroundColor,
       floatingActionButton: floatingActionButton,
       floatingActionButtonLocation: floatingActionButtonLocation,
-      bottomNavigationBar: showBottomNav ? _BottomNavigationBar(currentIndex: bottomNavIndex) : null,
+      bottomNavigationBar: showBottomNav
+          ? _BottomNavigationBar(currentIndex: bottomNavIndex)
+          : null,
       body: Column(
         children: [
           if (showHeader)
@@ -76,24 +86,18 @@ class AppShell extends StatelessWidget {
               onGlobeTap: onGlobeTap ?? () => _showComingSoon(context),
               onCurrencyTap: onCurrencyTap ?? () => _showComingSoon(context),
               onCartTap: onCartTap ?? () => context.go(AppRouter.cart),
-              onFavoritesTap: onFavoritesTap ?? () => context.go(AppRouter.favorites),
+              onFavoritesTap:
+                  onFavoritesTap ?? () => context.go(AppRouter.favorites),
               onProfileTap: onProfileTap ?? () => context.go(AppRouter.profile),
-              onSettingsTap: onSettingsTap ?? () => context.go(AppRouter.settings),
-              searchHint: searchHint,
+              onSettingsTap:
+                  onSettingsTap ?? () => context.go(AppRouter.settings),
+              searchHint: effectiveSearchHint,
               showSearchBar: showSearchBar,
               showActionIcons: showHeaderActions,
             ),
           if (headerBottom != null)
-            SizedBox(
-              width: double.infinity,
-              child: headerBottom!,
-            ),
-          Expanded(
-            child: SafeArea(
-              top: false,
-              child: _buildBody(),
-            ),
-          ),
+            SizedBox(width: double.infinity, child: headerBottom!),
+          Expanded(child: SafeArea(top: false, child: _buildBody())),
         ],
       ),
     );
@@ -104,30 +108,25 @@ class AppShell extends StatelessWidget {
       if (contentPadding == EdgeInsets.zero) {
         return body;
       }
-      return Padding(
-        padding: contentPadding,
-        child: body,
-      );
+      return Padding(padding: contentPadding, child: body);
     }
 
     return Align(
       alignment: Alignment.topCenter,
       child: ConstrainedBox(
         constraints: BoxConstraints(maxWidth: maxContentWidth),
-        child: Padding(
-          padding: contentPadding,
-          child: body,
-        ),
+        child: Padding(padding: contentPadding, child: body),
       ),
     );
   }
 
   void _showComingSoon(BuildContext context) {
+    final localization = LocalizationService.instance;
     ScaffoldMessenger.of(context)
       ..hideCurrentSnackBar()
       ..showSnackBar(
-        const SnackBar(
-          content: Text('Coming soon. Stay tuned!'),
+        SnackBar(
+          content: Text(localization.getString('comingSoonGeneric')),
           behavior: SnackBarBehavior.floating,
         ),
       );
@@ -141,55 +140,49 @@ class _BottomNavigationBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final safeIndex = currentIndex.clamp(0, 4);
+    final localization = LocalizationService.instance;
+    final destinations = <NavigationDestination>[
+      NavigationDestination(
+        icon: const Icon(Icons.home_outlined),
+        selectedIcon: const Icon(Icons.home),
+        label: localization.getString('home'),
+      ),
+      NavigationDestination(
+        icon: const Icon(Icons.favorite_border),
+        selectedIcon: const Icon(Icons.favorite),
+        label: localization.getString('favorites'),
+      ),
+      NavigationDestination(
+        icon: const Icon(Icons.shopping_cart_outlined),
+        selectedIcon: const Icon(Icons.shopping_cart),
+        label: localization.getString('cart'),
+      ),
+      NavigationDestination(
+        icon: const Icon(Icons.person_outline),
+        selectedIcon: const Icon(Icons.person),
+        label: localization.getString('profile'),
+      ),
+    ];
+    final safeIndex = currentIndex.clamp(0, destinations.length - 1).toInt();
 
     return NavigationBar(
       height: 70,
       selectedIndex: safeIndex,
       labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
-      destinations: const [
-        NavigationDestination(
-          icon: Icon(Icons.home_outlined),
-          selectedIcon: Icon(Icons.home),
-          label: 'Home',
-        ),
-        NavigationDestination(
-          icon: Icon(Icons.category_outlined),
-          selectedIcon: Icon(Icons.category),
-          label: 'Categories',
-        ),
-        NavigationDestination(
-          icon: Icon(Icons.favorite_border),
-          selectedIcon: Icon(Icons.favorite),
-          label: 'Favorites',
-        ),
-        NavigationDestination(
-          icon: Icon(Icons.shopping_cart_outlined),
-          selectedIcon: Icon(Icons.shopping_cart),
-          label: 'Cart',
-        ),
-        NavigationDestination(
-          icon: Icon(Icons.person_outline),
-          selectedIcon: Icon(Icons.person),
-          label: 'Profile',
-        ),
-      ],
+      destinations: destinations,
       onDestinationSelected: (index) {
-        if (index == safeIndex) return;
+        if (index == safeIndex && index != 0) return;
         switch (index) {
           case 0:
             context.go(AppRouter.home);
             break;
           case 1:
-            context.go(AppRouter.categories);
-            break;
-          case 2:
             context.go(AppRouter.favorites);
             break;
-          case 3:
+          case 2:
             context.go(AppRouter.cart);
             break;
-          case 4:
+          case 3:
             context.go(AppRouter.profile);
             break;
         }

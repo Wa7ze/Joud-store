@@ -1,44 +1,55 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../core/config/app_config.dart';
+import '../../core/utils/currency_utils.dart';
+import '../../core/utils/currency_utils.dart';
 import '../../core/localization/localization_service.dart';
-import '../../core/widgets/ui_states.dart';
 import '../../core/models/order.dart' as core;
+import '../../core/widgets/ui_states.dart';
 import 'providers/order_history_provider.dart';
 
 class OrderDetailScreen extends ConsumerWidget {
-  final String orderId;
-
   const OrderDetailScreen({super.key, required this.orderId});
+
+  final String orderId;
+  
+  get currency => null;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final localizationService = LocalizationService.instance;
+    final localization = LocalizationService.instance;
     final ordersAsync = ref.watch(orderHistoryProvider);
+    final isRtl = localization.textDirection == TextDirection.rtl;
 
     return ScreenScaffold(
-      title: localizationService.getString('orderDetails'),
+      title: localization.getString('orderDetails'),
       showBackButton: true,
-      currentIndex: 4,
+      currentIndex: 3,
       centerContent: false,
       contentPadding: EdgeInsets.zero,
       body: ordersAsync.when(
         loading: () => const LoadingState(),
         error: (_, __) => const EmptyState(
-          title: 'تعذر تحميل تفاصيل الطلب',
-          message: 'يرجى المحاولة لاحقاً.',
+          title: 'Unable to load order',
+          message: 'Please try again in a moment.',
         ),
         data: (orders) {
           core.Order? order;
-          for (final item in orders) {
-            if (item.id == orderId) {
-              order = item;
+          for (final candidate in orders) {
+            if (candidate.id == orderId) {
+              order = candidate;
               break;
             }
           }
 
-          if (order == null) {1;};final orderData = order!;final currency = AppConfig.defaultCurrency;
+          if (order == null) {
+            return const EmptyState(
+              title: 'Order not found',
+              message: 'We could not find the order you are looking for.',
+            );
+          }
+
+          final textAlign = isRtl ? TextAlign.right : TextAlign.left;
 
           return Align(
             alignment: Alignment.topCenter,
@@ -48,72 +59,103 @@ class OrderDetailScreen extends ConsumerWidget {
                 padding: const EdgeInsets.all(16),
                 children: [
                   _DetailTile(
-                    title: 'رقم الطلب',
-                    value: orderData.id,
+                    title: localization.getString('orderNumber'),
+                    value: order.id,
                     leading: Icons.confirmation_number,
+                    textAlign: textAlign,
                   ),
                   _DetailTile(
-                    title: 'الحالة',
-                    value: _statusLabel(orderData.orderStatus),
+                    title: localization.getString('orderStatus'),
+                    value: _statusLabel(order.orderStatus, localization),
                     leading: Icons.local_shipping,
+                    textAlign: textAlign,
                   ),
                   _DetailTile(
-                    title: 'التاريخ',
-                    value: _formatDateTime(orderData.createdAt),
+                    title: localization.getString('orderDate'),
+                    value: _formatDateTime(order.createdAt),
                     leading: Icons.calendar_today,
+                    textAlign: textAlign,
                   ),
                   _DetailTile(
-                    title: 'طريقة الدفع',
-                    value: orderData.paymentMethod == core.PaymentMethod.cashOnDelivery
-                        ? 'الدفع عند الاستلام'
-                        : 'بطاقة مصرفية',
+                    title: localization.getString('paymentMethod'),
+                    value:
+                        order.paymentMethod == core.PaymentMethod.cashOnDelivery
+                        ? localization.getString('cashOnDelivery')
+                        : localization.getString('onlinePayment'),
                     leading: Icons.payment,
+                    textAlign: textAlign,
                   ),
                   const SizedBox(height: 16),
-                  Text('عنوان التوصيل', style: Theme.of(context).textTheme.titleMedium),
+                  Text(
+                    localization.getString('deliveryAddress'),
+                    style: Theme.of(context).textTheme.titleMedium,
+                    textAlign: textAlign,
+                  ),
                   const SizedBox(height: 8),
-                  _AddressCard(address: orderData.addressSnapshot),
+                  _AddressCard(
+                    address: order.addressSnapshot,
+                    textAlign: textAlign,
+                  ),
                   const SizedBox(height: 16),
-                  Text('المنتجات', style: Theme.of(context).textTheme.titleMedium),
+                  Text(
+                    localization.getString('items'),
+                    style: Theme.of(context).textTheme.titleMedium,
+                    textAlign: textAlign,
+                  ),
                   const SizedBox(height: 8),
-                  ...orderData.items.map(
+                  ...order.items.map(
                     (item) => Card(
                       margin: const EdgeInsets.only(bottom: 12),
                       child: ListTile(
                         leading: const Icon(Icons.shopping_bag),
-                        title: Text('منتج ${item.productId}'),
+                        title: Text(
+                          '${localization.getString('product')} ${item.productId}',
+                          textAlign: textAlign,
+                        ),
                         subtitle: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text('الكمية: ${item.quantity}'),
+                            Text(
+                              '${localization.getString('quantity')}: ${item.quantity}',
+                              textAlign: textAlign,
+                            ),
                             for (final entry in item.selectedOptions.entries)
-                              Text('${entry.key}: ${entry.value}'),
+                              Text(
+                                '${entry.key}: ${entry.value}',
+                                textAlign: textAlign,
+                              ),
                           ],
                         ),
-                        trailing: Text('${item.lineTotal.toStringAsFixed(0)} $currency'),
+                        trailing: Text(
+                          '${item.lineTotal.toStringAsFixed(0)} $currency',
+                        ),
                       ),
                     ),
                   ),
                   const Divider(),
                   _SummaryRow(
-                    label: 'المجموع الفرعي',
-                    value: '${orderData.subtotal.toStringAsFixed(0)} $currency',
+                    label: localization.getString('subtotal'),
+                    value: '${order.subtotal.toStringAsFixed(0)} $currency',
+                    textAlign: textAlign,
                   ),
                   _SummaryRow(
-                    label: 'رسوم التوصيل',
-                    value: '${orderData.deliveryFee.toStringAsFixed(0)} $currency',
+                    label: localization.getString('deliveryFee'),
+                    value: CurrencyUtils.format(order.deliveryFee),
+                    textAlign: textAlign,
                   ),
-                  if (orderData.discount > 0)
+                  if (order.discount > 0)
                     _SummaryRow(
-                      label: 'الخصم',
-                      value: '-${orderData.discount.toStringAsFixed(0)} $currency',
+                      label: localization.getString('discount'),
+                      value: '-${CurrencyUtils.format(order.discount)}',
+                      textAlign: textAlign,
                       accent: Colors.red,
                     ),
                   const Divider(),
                   _SummaryRow(
-                    label: 'الإجمالي',
-                    value: '${orderData.total.toStringAsFixed(0)} $currency',
+                    label: localization.getString('total'),
+                    value: CurrencyUtils.format(order.total),
                     isBold: true,
+                    textAlign: textAlign,
                   ),
                 ],
               ),
@@ -124,14 +166,22 @@ class OrderDetailScreen extends ConsumerWidget {
     );
   }
 
-  String _statusLabel(core.OrderStatus status) {
-    return switch (status) {
-      core.OrderStatus.placed => 'تم الاستلام',
-      core.OrderStatus.confirmed => 'قيد التحضير',
-      core.OrderStatus.outForDelivery => 'قيد التوصيل',
-      core.OrderStatus.delivered => 'تم التسليم',
-      core.OrderStatus.cancelled => 'أُلغي',
-    };
+  String _statusLabel(
+    core.OrderStatus status,
+    LocalizationService localization,
+  ) {
+    switch (status) {
+      case core.OrderStatus.placed:
+        return localization.getString('orderPlaced');
+      case core.OrderStatus.confirmed:
+        return localization.getString('orderConfirmed');
+      case core.OrderStatus.outForDelivery:
+        return localization.getString('orderOutForDelivery');
+      case core.OrderStatus.delivered:
+        return localization.getString('orderDelivered');
+      case core.OrderStatus.cancelled:
+        return localization.getString('orderCancelled');
+    }
   }
 
   String _formatDateTime(DateTime dateTime) {
@@ -145,31 +195,34 @@ class OrderDetailScreen extends ConsumerWidget {
 }
 
 class _DetailTile extends StatelessWidget {
-  final String title;
-  final String value;
-  final IconData leading;
-
   const _DetailTile({
     required this.title,
     required this.value,
     required this.leading,
+    required this.textAlign,
   });
+
+  final String title;
+  final String value;
+  final IconData leading;
+  final TextAlign textAlign;
 
   @override
   Widget build(BuildContext context) {
     return ListTile(
       contentPadding: EdgeInsets.zero,
       leading: Icon(leading),
-      title: Text(title),
-      subtitle: Text(value),
+      title: Text(title, textAlign: textAlign),
+      subtitle: Text(value, textAlign: textAlign),
     );
   }
 }
 
 class _AddressCard extends StatelessWidget {
-  final Map<String, dynamic> address;
+  const _AddressCard({required this.address, required this.textAlign});
 
-  const _AddressCard({required this.address});
+  final Map<String, dynamic> address;
+  final TextAlign textAlign;
 
   @override
   Widget build(BuildContext context) {
@@ -183,7 +236,10 @@ class _AddressCard extends StatelessWidget {
             for (final entry in address.entries)
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 4),
-                child: Text('${entry.key}: ${entry.value}'),
+                child: Text(
+                  '${entry.key}: ${entry.value}',
+                  textAlign: textAlign,
+                ),
               ),
           ],
         ),
@@ -193,33 +249,38 @@ class _AddressCard extends StatelessWidget {
 }
 
 class _SummaryRow extends StatelessWidget {
-  final String label;
-  final String value;
-  final bool isBold;
-  final Color? accent;
-
   const _SummaryRow({
     required this.label,
     required this.value,
+    required this.textAlign,
     this.isBold = false,
     this.accent,
   });
 
+  final String label;
+  final String value;
+  final TextAlign textAlign;
+  final bool isBold;
+  final Color? accent;
+
   @override
   Widget build(BuildContext context) {
-    final style = isBold
-        ? Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)
-        : Theme.of(context).textTheme.bodyLarge;
+    final baseStyle = Theme.of(context).textTheme.bodyLarge;
+    final textStyle = isBold
+        ? baseStyle?.copyWith(fontWeight: FontWeight.bold)
+        : baseStyle;
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(label, style: style),
-          Text(value, style: style?.copyWith(color: accent)),
+          Expanded(
+            child: Text(label, style: textStyle, textAlign: textAlign),
+          ),
+          const SizedBox(width: 12),
+          Text(value, style: textStyle?.copyWith(color: accent)),
         ],
       ),
     );
   }
 }
-

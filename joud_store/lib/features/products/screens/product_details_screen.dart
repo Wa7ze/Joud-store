@@ -1,14 +1,15 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 
 import '../../cart/providers/cart_provider.dart';
 import '../../../core/widgets/ui_states.dart';
-import '../../../core/config/app_config.dart';
-import '../../../core/router/app_router.dart';
+import '../../../core/widgets/page_container.dart';
 import '../../../core/widgets/product_card.dart';
+import '../../../core/widgets/screen_scaffold.dart';
 import '../../products/models/product.dart';
 import '../../products/services/product_service.dart';
+import '../../../core/utils/currency_utils.dart';
+import '../../../core/localization/localization_service.dart';
 
 class ProductDetailsScreen extends ConsumerStatefulWidget {
   final Product product;
@@ -16,7 +17,8 @@ class ProductDetailsScreen extends ConsumerStatefulWidget {
   const ProductDetailsScreen({super.key, required this.product});
 
   @override
-  ConsumerState<ProductDetailsScreen> createState() => _ProductDetailsScreenState();
+  ConsumerState<ProductDetailsScreen> createState() =>
+      _ProductDetailsScreenState();
 }
 
 class _ProductDetailsScreenState extends ConsumerState<ProductDetailsScreen> {
@@ -50,42 +52,51 @@ class _ProductDetailsScreenState extends ConsumerState<ProductDetailsScreen> {
       currentIndex: 0,
       centerContent: false,
       contentPadding: EdgeInsets.zero,
-      body: Align(
-        alignment: Alignment.topCenter,
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 780),
-          child: ListView(
-            padding: const EdgeInsets.all(16),
+      body: SingleChildScrollView(
+        child: PageContainer(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               ClipRRect(
-                borderRadius: BorderRadius.circular(16),
+                borderRadius: BorderRadius.circular(20),
                 child: AspectRatio(
                   aspectRatio: 1,
                   child: heroImage == null
                       ? Container(
                           color: Colors.grey.shade200,
-                          child: const Icon(Icons.image_not_supported, size: 48),
+                          alignment: Alignment.center,
+                          child: const Icon(
+                            Icons.image_not_supported,
+                            size: 48,
+                          ),
                         )
                       : Image.network(
                           heroImage,
                           fit: BoxFit.cover,
                           errorBuilder: (_, __, ___) => Container(
                             color: Colors.grey.shade200,
-                            child: const Icon(Icons.image_not_supported, size: 48),
+                            alignment: Alignment.center,
+                            child: const Icon(
+                              Icons.image_not_supported,
+                              size: 48,
+                            ),
                           ),
                         ),
                 ),
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 24),
               Text(
                 product.name,
-                style: theme.textTheme.headlineSmall,
+                style: theme.textTheme.headlineSmall?.copyWith(
+                  fontWeight: FontWeight.w700,
+                ),
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: 12),
               Row(
                 children: [
                   Text(
-                    '${product.price.toStringAsFixed(0)} ${AppConfig.defaultCurrency}',
+                    CurrencyUtils.format(product.price),
                     style: theme.textTheme.titleLarge?.copyWith(
                       color: theme.colorScheme.primary,
                       fontWeight: FontWeight.bold,
@@ -94,7 +105,7 @@ class _ProductDetailsScreenState extends ConsumerState<ProductDetailsScreen> {
                   if (hasDiscount) ...[
                     const SizedBox(width: 12),
                     Text(
-                      '${product.originalPrice!.toStringAsFixed(0)} ${AppConfig.defaultCurrency}',
+                      CurrencyUtils.format(product.originalPrice!),
                       style: theme.textTheme.bodyMedium?.copyWith(
                         decoration: TextDecoration.lineThrough,
                         color: theme.colorScheme.onSurfaceVariant,
@@ -103,15 +114,17 @@ class _ProductDetailsScreenState extends ConsumerState<ProductDetailsScreen> {
                   ],
                 ],
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 24),
+              _buildActionButtons(),
+              const SizedBox(height: 24),
               if (sizes?.isNotEmpty ?? false) ...[
                 _buildSectionTitle(
                   context,
-                  'اختر المقاس',
+                  '???? ??????',
                   trailing: TextButton.icon(
                     onPressed: () => _showSizeGuide(context),
                     icon: const Icon(Icons.straighten, size: 18),
-                    label: const Text('دليل المقاسات'),
+                    label: const Text('???? ????????'),
                   ),
                 ),
                 Wrap(
@@ -122,15 +135,16 @@ class _ProductDetailsScreenState extends ConsumerState<ProductDetailsScreen> {
                         (size) => ChoiceChip(
                           label: Text(size),
                           selected: _selectedSize == size,
-                          onSelected: (_) => setState(() => _selectedSize = size),
+                          onSelected: (_) =>
+                              setState(() => _selectedSize = size),
                         ),
                       )
                       .toList(),
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: 24),
               ],
               if (colors?.isNotEmpty ?? false) ...[
-                _buildSectionTitle(context, 'اختر اللون'),
+                _buildSectionTitle(context, '???? ?????'),
                 Wrap(
                   spacing: 8,
                   runSpacing: 8,
@@ -139,58 +153,64 @@ class _ProductDetailsScreenState extends ConsumerState<ProductDetailsScreen> {
                         (color) => ChoiceChip(
                           label: Text(color),
                           selected: _selectedColor == color,
-                          onSelected: (_) => setState(() => _selectedColor = color),
+                          onSelected: (_) =>
+                              setState(() => _selectedColor = color),
                         ),
                       )
                       .toList(),
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: 24),
               ],
               if (product.description.isNotEmpty) ...[
-                _buildSectionTitle(context, 'الوصف'),
+                _buildSectionTitle(context, '?????'),
                 Text(product.description, style: theme.textTheme.bodyLarge),
-                const SizedBox(height: 16),
+                const SizedBox(height: 24),
               ],
-              _buildSectionTitle(context, 'تفاصيل المنتج'),
-              _buildDetailRow(context, 'الماركة', product.brand ?? 'غير متوفر'),
-              _buildDetailRow(context, 'الخامة', product.material ?? 'غير متوفر'),
-              _buildDetailRow(context, 'القَصّة', product.fit ?? 'غير متوفر'),
-              _buildDetailRow(context, 'الموسم', product.season ?? 'غير متوفر'),
+              _buildSectionTitle(context, '?????? ??????'),
+              _buildDetailRow(context, '???????', product.brand ?? '??? ?????'),
+              _buildDetailRow(
+                context,
+                '??????',
+                product.material ?? '??? ?????',
+              ),
+              _buildDetailRow(context, '???????', product.fit ?? '??? ?????'),
+              _buildDetailRow(context, '??????', product.season ?? '??? ?????'),
               if (product.measurements?.isNotEmpty ?? false) ...[
                 const SizedBox(height: 16),
-                _buildSectionTitle(context, 'المقاسات'),
+                _buildSectionTitle(context, '????????'),
                 Wrap(
                   spacing: 12,
                   runSpacing: 12,
                   children: product.measurements!.entries
                       .map(
-                        (entry) => Chip(
-                          label: Text('${entry.key}: ${entry.value}'),
+                        (entry) =>
+                            Chip(label: Text('${entry.key}: ${entry.value}')),
+                      )
+                      .toList(),
+                ),
+                const SizedBox(height: 24),
+              ],
+              if (product.careInstructions?.isNotEmpty ?? false) ...[
+                _buildSectionTitle(context, '??????? ???????'),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: product.careInstructions!
+                      .map(
+                        (instruction) => Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 4),
+                          child: Row(
+                            children: [
+                              Icon(_careIconFor(instruction), size: 20),
+                              const SizedBox(width: 8),
+                              Expanded(child: Text(instruction)),
+                            ],
+                          ),
                         ),
                       )
                       .toList(),
                 ),
+                const SizedBox(height: 24),
               ],
-              if (product.careInstructions?.isNotEmpty ?? false) ...[
-                const SizedBox(height: 16),
-                _buildSectionTitle(context, 'تعليمات العناية'),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: product.careInstructions!
-                      .map((instruction) => Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 4),
-                            child: Row(
-                              children: [
-                                Icon(_careIconFor(instruction), size: 20),
-                                const SizedBox(width: 8),
-                                Expanded(child: Text(instruction)),
-                              ],
-                            ),
-                          ))
-                      .toList(),
-                ),
-              ],
-              const SizedBox(height: 24),
               FutureBuilder<List<Product>>(
                 future: _recommendedFuture,
                 builder: (context, snapshot) {
@@ -202,26 +222,24 @@ class _ProductDetailsScreenState extends ConsumerState<ProductDetailsScreen> {
                     return const SizedBox.shrink();
                   }
                   return Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      _buildSectionTitle(context, 'قد يعجبك أيضاً'),
-                      SizedBox(
-                        height: 270,
-                        child: ListView.separated(
-                          scrollDirection: Axis.horizontal,
-                          itemCount: products.length,
-                          separatorBuilder: (_, __) => const SizedBox(width: 12),
-                          itemBuilder: (context, index) {
-                            final item = products[index];
-                            return SizedBox(
-                              width: 180,
-                              child: ProductCard(
-                                product: item,
-                                onTap: () => context.go('${AppRouter.productDetail}/${item.id}'),
-                              ),
-                            );
-                          },
-                        ),
+                      _buildSectionTitle(context, '?? ????? ?????'),
+                      const SizedBox(height: 12),
+                      GridView.builder(
+                        shrinkWrap: true,
+                        physics: const NeverScrollableScrollPhysics(),
+                        padding: const EdgeInsets.symmetric(horizontal: 4),
+                        gridDelegate:
+                            const SliverGridDelegateWithFixedCrossAxisCount(
+                              crossAxisCount: 2,
+                              mainAxisSpacing: 12,
+                              crossAxisSpacing: 12,
+                              childAspectRatio: 0.68,
+                            ),
+                        itemCount: products.length,
+                        itemBuilder: (context, index) =>
+                            ProductCard(product: products[index]),
                       ),
                       const SizedBox(height: 24),
                     ],
@@ -230,7 +248,9 @@ class _ProductDetailsScreenState extends ConsumerState<ProductDetailsScreen> {
               ),
               ElevatedButton(
                 onPressed: () {
-                  ref.read(cartProvider.notifier).addCustomItem(
+                  ref
+                      .read(cartProvider.notifier)
+                      .addCustomItem(
                         productId: product.id,
                         name: product.name,
                         price: product.price,
@@ -242,13 +262,16 @@ class _ProductDetailsScreenState extends ConsumerState<ProductDetailsScreen> {
                       );
 
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('تمت إضافة المنتج إلى السلة')),
+                    const SnackBar(content: Text('??? ????? ?????? ??? ?????')),
                   );
                 },
                 style: ElevatedButton.styleFrom(
                   minimumSize: const Size.fromHeight(52),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                  ),
                 ),
-                child: const Text('إضافة إلى السلة'),
+                child: const Text('????? ??? ?????'),
               ),
             ],
           ),
@@ -257,7 +280,32 @@ class _ProductDetailsScreenState extends ConsumerState<ProductDetailsScreen> {
     );
   }
 
-  Widget _buildSectionTitle(BuildContext context, String title, {Widget? trailing}) {
+  Widget _buildActionButtons() {
+    final localization = LocalizationService.instance;
+    return Row(
+      children: [
+        Expanded(
+          child: FilledButton(
+            onPressed: () {},
+            child: Text(localization.getString('productAddToCartButton')),
+          ),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: OutlinedButton(
+            onPressed: () {},
+            child: Text(localization.getString('productAddToFavouritesButton')),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildSectionTitle(
+    BuildContext context,
+    String title, {
+    Widget? trailing,
+  }) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 8),
       child: Row(
@@ -265,10 +313,9 @@ class _ProductDetailsScreenState extends ConsumerState<ProductDetailsScreen> {
         children: [
           Text(
             title,
-            style: Theme.of(context)
-                .textTheme
-                .titleMedium
-                ?.copyWith(fontWeight: FontWeight.bold),
+            style: Theme.of(
+              context,
+            ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
           ),
           if (trailing != null) trailing,
         ],
@@ -302,23 +349,26 @@ class _ProductDetailsScreenState extends ConsumerState<ProductDetailsScreen> {
 
   IconData _careIconFor(String instruction) {
     final lower = instruction.toLowerCase();
-    if (lower.contains('wash') || lower.contains('غسل')) {
+    if (lower.contains('wash') || lower.contains('???')) {
       return Icons.local_laundry_service;
     }
-    if (lower.contains('dry') || lower.contains('تجفيف')) {
+    if (lower.contains('dry') || lower.contains('?????')) {
       return Icons.waves;
     }
-    if (lower.contains('iron') || lower.contains('كي')) {
+    if (lower.contains('iron') || lower.contains('??')) {
       return Icons.iron;
     }
-    if (lower.contains('bleach') || lower.contains('مبيض')) {
+    if (lower.contains('bleach') || lower.contains('????')) {
       return Icons.block;
     }
     return Icons.info_outline;
   }
 
   void _showSizeGuide(BuildContext context) {
-    final data = _sizeGuideFor(widget.product.categoryId ?? '', widget.product.subcategory ?? '');
+    final data = _sizeGuideFor(
+      widget.product.categoryId ?? '',
+      widget.product.subcategory ?? '',
+    );
     showModalBottomSheet(
       context: context,
       shape: const RoundedRectangleBorder(
@@ -331,21 +381,23 @@ class _ProductDetailsScreenState extends ConsumerState<ProductDetailsScreen> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('دليل المقاسات', style: Theme.of(context).textTheme.titleLarge),
+              Text(
+                '???? ????????',
+                style: Theme.of(context).textTheme.titleLarge,
+              ),
               const SizedBox(height: 16),
               ...data.map(
                 (row) => Padding(
                   padding: const EdgeInsets.symmetric(vertical: 4),
-                  child: Text('${row[0]} — ${row[1]}'),
+                  child: Text('${row[0]} - ${row[1]}'),
                 ),
               ),
               const SizedBox(height: 12),
               Text(
-                'المقاسات تقريبية وقد تختلف حسب نوع القماش والموديل.',
-                style: Theme.of(context)
-                    .textTheme
-                    .bodySmall
-                    ?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant),
+                '???????? ??????? ??? ????? ??? ??? ?????? ????????.',
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
               ),
             ],
           ),
@@ -357,28 +409,28 @@ class _ProductDetailsScreenState extends ConsumerState<ProductDetailsScreen> {
   List<List<String>> _sizeGuideFor(String categoryId, String subcategory) {
     if (categoryId == 'women') {
       return const [
-        ['XS', 'الصدر 80 سم - الخصر 62 سم'],
-        ['S', 'الصدر 84 سم - الخصر 66 سم'],
-        ['M', 'الصدر 88 سم - الخصر 70 سم'],
-        ['L', 'الصدر 92 سم - الخصر 74 سم'],
-        ['XL', 'الصدر 96 سم - الخصر 78 سم'],
+        ['XS', '????? 80 ?? - ????? 62 ??'],
+        ['S', '????? 84 ?? - ????? 66 ??'],
+        ['M', '????? 88 ?? - ????? 70 ??'],
+        ['L', '????? 92 ?? - ????? 74 ??'],
+        ['XL', '????? 96 ?? - ????? 78 ??'],
       ];
     }
     if (categoryId == 'kids') {
       return const [
-        ['2', 'الطول 92 سم'],
-        ['4', 'الطول 104 سم'],
-        ['6', 'الطول 116 سم'],
-        ['8', 'الطول 128 سم'],
-        ['10', 'الطول 140 سم'],
+        ['2', '????? 92 ??'],
+        ['4', '????? 104 ??'],
+        ['6', '????? 116 ??'],
+        ['8', '????? 128 ??'],
+        ['10', '????? 140 ??'],
       ];
     }
     return const [
-      ['S', 'الصدر 92 سم - الخصر 78 سم'],
-      ['M', 'الصدر 96 سم - الخصر 82 سم'],
-      ['L', 'الصدر 100 سم - الخصر 86 سم'],
-      ['XL', 'الصدر 106 سم - الخصر 92 سم'],
-      ['2XL', 'الصدر 112 سم - الخصر 98 سم'],
+      ['S', '????? 92 ?? - ????? 78 ??'],
+      ['M', '????? 96 ?? - ????? 82 ??'],
+      ['L', '????? 100 ?? - ????? 86 ??'],
+      ['XL', '????? 106 ?? - ????? 92 ??'],
+      ['2XL', '????? 112 ?? - ????? 98 ??'],
     ];
   }
 }

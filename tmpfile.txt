@@ -4,7 +4,6 @@ import 'package:go_router/go_router.dart';
 import '../../core/config/app_config.dart';
 import '../../core/localization/localization_service.dart';
 import '../../core/router/app_router.dart';
-import '../../core/utils/currency_utils.dart';
 import '../../core/widgets/ui_states.dart';
 import '../cart/models/cart_item.dart';
 import '../cart/providers/cart_provider.dart';
@@ -19,8 +18,6 @@ class CheckoutScreen extends ConsumerStatefulWidget {
 
 class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
   int _currentStep = 0;
-  
-  get currency => null;
 
   @override
   Widget build(BuildContext context) {
@@ -35,7 +32,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
 
     return ScreenScaffold(
       title: localizationService.getString('checkout'),
-      currentIndex: 3,
+      currentIndex: 2,
       showBackButton: true,
       centerContent: false,
       contentPadding: const EdgeInsetsDirectional.symmetric(
@@ -143,6 +140,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
   }
 
   Widget _buildReview(List<CartItem> items, LocalizationService localization) {
+    final currency = AppConfig.defaultCurrency;
     final deliveryFee = AppConfig.deliveryFees['damascus'] ?? 5000;
     final subtotal = items.fold<double>(
       0,
@@ -174,11 +172,11 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
               ),
               title: Text(item.productId, textAlign: textAlign),
               subtitle: Text(
-                '${item.quantity} Ã— ${CurrencyUtils.format(item.price)}',
+                '${item.quantity} × ${item.price.toStringAsFixed(0)} $currency',
                 textAlign: textAlign,
               ),
               trailing: Text(
-                CurrencyUtils.format(item.price * item.quantity),
+                '${(item.price * item.quantity).toStringAsFixed(0)} $currency',
                 textAlign: textDirection == TextDirection.rtl
                     ? TextAlign.left
                     : TextAlign.right,
@@ -188,18 +186,18 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
           const SizedBox(height: 12),
           _ReviewRow(
             label: localization.getString('checkoutSubtotalLabel'),
-            value: CurrencyUtils.format(subtotal),
+            value: '${subtotal.toStringAsFixed(0)} $currency',
             textDirection: textDirection,
           ),
           _ReviewRow(
             label: localization.getString('checkoutDeliveryFeeLabel'),
-            value: CurrencyUtils.format(deliveryFee),
+            value: '${deliveryFee.toStringAsFixed(0)} $currency',
             textDirection: textDirection,
           ),
           const Divider(),
           _ReviewRow(
             label: localization.getString('checkoutTotalLabel'),
-            value: CurrencyUtils.format(total),
+            value: '${total.toStringAsFixed(0)} $currency',
             isEmphasized: true,
             textDirection: textDirection,
           ),

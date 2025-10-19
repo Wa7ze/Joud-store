@@ -1,8 +1,11 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:visibility_detector/visibility_detector.dart';
 
+import '../../../core/router/app_router.dart';
+import '../../../core/utils/currency_utils.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../products/models/product.dart';
 
@@ -24,7 +27,12 @@ class CategoryShowcase extends StatelessWidget {
       future: productsFuture,
       builder: (context, snapshot) {
         if (snapshot.connectionState != ConnectionState.done) {
-          return const Center(child: Padding(padding: EdgeInsets.only(top: 64), child: CircularProgressIndicator()));
+          return const Center(
+            child: Padding(
+              padding: EdgeInsets.only(top: 64),
+              child: CircularProgressIndicator(),
+            ),
+          );
         }
 
         if (!snapshot.hasData || snapshot.data!.isEmpty) {
@@ -33,7 +41,9 @@ class CategoryShowcase extends StatelessWidget {
               padding: const EdgeInsets.symmetric(vertical: 64),
               child: Text(
                 'Nothing to show yet.',
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(color: AppColors.onSurfaceVariant),
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  color: AppColors.onSurfaceVariant,
+                ),
               ),
             ),
           );
@@ -45,12 +55,16 @@ class CategoryShowcase extends StatelessWidget {
           children: [
             Text(
               title,
-              style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w700),
+              style: Theme.of(
+                context,
+              ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w700),
             ),
             const SizedBox(height: 24),
             _ShowcaseGrid(
               products: products,
               direction: textDirection,
+              onProductTap: (product) =>
+                  context.push('${AppRouter.productDetail}/${product.id}'),
             ),
           ],
         );
@@ -63,10 +77,12 @@ class _ShowcaseGrid extends StatelessWidget {
   const _ShowcaseGrid({
     required this.products,
     required this.direction,
+    required this.onProductTap,
   });
 
   final List<Product> products;
   final TextDirection direction;
+  final ValueChanged<Product> onProductTap;
 
   static const List<_TileLayout> _pattern = [
     _TileLayout(widthSpan: 2, height: 320, slot: _EntrySlot.start),
@@ -85,14 +101,16 @@ class _ShowcaseGrid extends StatelessWidget {
         final bool isCompact = maxWidth < 720;
         final int columns = isCompact ? 2 : 3;
         final double spacing = isCompact ? 14 : 20;
-        final double columnWidth = (maxWidth - spacing * (columns - 1)) / columns;
+        final double columnWidth =
+            (maxWidth - spacing * (columns - 1)) / columns;
 
         final children = <Widget>[];
 
         for (var i = 0; i < products.length; i++) {
           final product = products[i];
           final layout = _pattern[i % _pattern.length].adaptForColumns(columns);
-          final width = columnWidth * layout.widthSpan + spacing * (layout.widthSpan - 1);
+          final width =
+              columnWidth * layout.widthSpan + spacing * (layout.widthSpan - 1);
 
           children.add(
             SizedBox(
@@ -102,6 +120,7 @@ class _ShowcaseGrid extends StatelessWidget {
                 height: layout.height,
                 slot: layout.slot,
                 textDirection: direction,
+                onTap: () => onProductTap(product),
               ),
             ),
           );
@@ -124,18 +143,21 @@ class _ShowcaseTile extends StatefulWidget {
     required this.height,
     required this.slot,
     required this.textDirection,
+    required this.onTap,
   });
 
   final Product product;
   final double height;
   final _EntrySlot slot;
   final TextDirection textDirection;
+  final VoidCallback onTap;
 
   @override
   State<_ShowcaseTile> createState() => _ShowcaseTileState();
 }
 
-class _ShowcaseTileState extends State<_ShowcaseTile> with SingleTickerProviderStateMixin {
+class _ShowcaseTileState extends State<_ShowcaseTile>
+    with SingleTickerProviderStateMixin {
   late final AnimationController _controller;
   late final Animation<double> _fade;
   late final Animation<Offset> _slide;
@@ -145,7 +167,10 @@ class _ShowcaseTileState extends State<_ShowcaseTile> with SingleTickerProviderS
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(vsync: this, duration: const Duration(milliseconds: 550));
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 550),
+    );
     _fade = CurvedAnimation(parent: _controller, curve: Curves.easeOut);
     _slide = Tween<Offset>(
       begin: _offsetFor(widget.slot, widget.textDirection),
@@ -176,7 +201,14 @@ class _ShowcaseTileState extends State<_ShowcaseTile> with SingleTickerProviderS
         opacity: _fade,
         child: SlideTransition(
           position: _slide,
-          child: _buildContent(context),
+          child: Material(
+            color: Colors.transparent,
+            child: InkWell(
+              onTap: widget.onTap,
+              borderRadius: BorderRadius.circular(18),
+              child: _buildContent(context),
+            ),
+          ),
         ),
       ),
     );
@@ -225,7 +257,7 @@ class _ShowcaseTileState extends State<_ShowcaseTile> with SingleTickerProviderS
                   ),
                   const SizedBox(height: 6),
                   Text(
-                    '${product.price.toStringAsFixed(0)} SYP',
+                    CurrencyUtils.format(product.price),
                     style: theme.textTheme.titleSmall?.copyWith(
                       color: Colors.white70,
                       fontWeight: FontWeight.w500,
@@ -239,7 +271,10 @@ class _ShowcaseTileState extends State<_ShowcaseTile> with SingleTickerProviderS
                 top: 16,
                 left: 16,
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 6,
+                  ),
                   decoration: BoxDecoration(
                     color: AppColors.accent.withValues(alpha: 0.9),
                     borderRadius: BorderRadius.circular(14),
@@ -260,7 +295,9 @@ class _ShowcaseTileState extends State<_ShowcaseTile> with SingleTickerProviderS
   }
 
   Widget _buildHeroImage() {
-    final String? imagePath = widget.product.images.isNotEmpty ? widget.product.images.first : null;
+    final String? imagePath = widget.product.images.isNotEmpty
+        ? widget.product.images.first
+        : null;
     if (imagePath == null) {
       return Container(color: AppColors.surfaceVariant);
     }
@@ -271,7 +308,11 @@ class _ShowcaseTileState extends State<_ShowcaseTile> with SingleTickerProviderS
         errorBuilder: (_, __, ___) => Container(
           color: AppColors.surfaceVariant,
           alignment: Alignment.center,
-          child: const Icon(Icons.image_not_supported_outlined, color: Colors.white54, size: 36),
+          child: const Icon(
+            Icons.image_not_supported_outlined,
+            color: Colors.white54,
+            size: 36,
+          ),
         ),
       );
     }
@@ -289,9 +330,13 @@ class _ShowcaseTileState extends State<_ShowcaseTile> with SingleTickerProviderS
   Offset _offsetFor(_EntrySlot slot, TextDirection direction) {
     switch (slot) {
       case _EntrySlot.start:
-        return direction == TextDirection.rtl ? const Offset(0.2, 0) : const Offset(-0.2, 0);
+        return direction == TextDirection.rtl
+            ? const Offset(0.2, 0)
+            : const Offset(-0.2, 0);
       case _EntrySlot.end:
-        return direction == TextDirection.rtl ? const Offset(-0.2, 0) : const Offset(0.2, 0);
+        return direction == TextDirection.rtl
+            ? const Offset(-0.2, 0)
+            : const Offset(0.2, 0);
       case _EntrySlot.center:
         return const Offset(0, 0.16);
     }

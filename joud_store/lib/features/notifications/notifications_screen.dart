@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/localization/localization_service.dart';
 import '../../core/widgets/ui_states.dart';
@@ -13,7 +13,7 @@ class NotificationsScreen extends ConsumerWidget {
     return ScreenScaffold(
       title: localizationService.getString('notifications'),
       showBackButton: false,
-      currentIndex: 2,
+      currentIndex: 3,
       body: const EmptyState(
         title: 'لا توجد إشعارات حالياً',
         message: 'سنخبرك بالعروض وتحديثات الطلبات فور توفرها.',
