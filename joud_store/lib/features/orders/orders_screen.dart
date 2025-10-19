@@ -1,10 +1,11 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../core/config/app_config.dart';
 import '../../core/localization/localization_service.dart';
 import '../../core/router/app_router.dart';
+import '../../core/utils/currency_utils.dart';
+import '../../core/widgets/screen_scaffold.dart';
 import '../../core/widgets/ui_states.dart';
 import '../../core/models/order.dart' as core;
 import 'providers/order_history_provider.dart';
@@ -68,7 +69,6 @@ class _OrderCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final currency = AppConfig.defaultCurrency;
     return Card(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: InkWell(
@@ -96,7 +96,11 @@ class _OrderCard extends StatelessWidget {
               const SizedBox(height: 12),
               Row(
                 children: [
-                  Icon(Icons.shopping_bag, size: 20, color: theme.colorScheme.primary),
+                  Icon(
+                    Icons.shopping_bag,
+                    size: 20,
+                    color: theme.colorScheme.primary,
+                  ),
                   const SizedBox(width: 8),
                   Text('عدد المنتجات: ${order.items.length}'),
                 ],
@@ -104,11 +108,17 @@ class _OrderCard extends StatelessWidget {
               const SizedBox(height: 8),
               Row(
                 children: [
-                  Icon(Icons.attach_money, size: 20, color: theme.colorScheme.primary),
+                  Icon(
+                    Icons.attach_money,
+                    size: 20,
+                    color: theme.colorScheme.primary,
+                  ),
                   const SizedBox(width: 8),
                   Text(
-                    '${order.total.toStringAsFixed(0)} $currency (${order.paymentStatus == core.PaymentStatus.paid ? 'مدفوع' : 'قيد الدفع'})',
-                    style: theme.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.bold),
+                    '${CurrencyUtils.format(order.total)} (${order.paymentStatus == core.PaymentStatus.paid ? 'مدفوع' : 'قيد الدفع'})',
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ],
               ),

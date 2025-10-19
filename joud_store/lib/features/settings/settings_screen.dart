@@ -1,8 +1,11 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+
 import '../../core/localization/localization_service.dart';
 import '../../core/router/app_router.dart';
+import '../../core/widgets/language_picker.dart';
+import '../../core/widgets/screen_scaffold.dart';
 import '../../core/widgets/ui_states.dart';
 import '../settings/providers/settings_provider.dart';
 
@@ -13,14 +16,14 @@ class SettingsScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final settings = ref.watch(settingsProvider);
     final localization = LocalizationService.instance;
-    final textAlign =
-        localization.textDirection == TextDirection.rtl ? TextAlign.right : TextAlign.left;
-    final isArabic = localization.currentLocale.languageCode == 'ar';
+    final isRtl = localization.textDirection == TextDirection.rtl;
+    final textAlign = isRtl ? TextAlign.right : TextAlign.left;
+    final localeLabel = LanguagePicker.describeLocale(settings.locale);
 
     return ScreenScaffold(
       title: localization.getString('settings'),
       showBackButton: true,
-      currentIndex: 4,
+      currentIndex: 3,
       centerContent: false,
       contentPadding: EdgeInsets.zero,
       body: Align(
@@ -28,41 +31,54 @@ class SettingsScreen extends ConsumerWidget {
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 780),
           child: ListView(
-            padding: const EdgeInsetsDirectional.symmetric(horizontal: 16, vertical: 16),
+            padding: const EdgeInsetsDirectional.symmetric(
+              horizontal: 16,
+              vertical: 16,
+            ),
             children: [
               ListTile(
                 leading: const Icon(Icons.language),
                 title: Text(
-                  isArabic ? 'English' : 'عربي',
+                  localization.getString('language'),
                   textAlign: textAlign,
                 ),
-                subtitle: Text(localization.getString('language'), textAlign: textAlign),
+                subtitle: Text(localeLabel, textAlign: textAlign),
                 trailing: const Icon(Icons.swap_horiz),
                 onTap: () async {
-                  final newLocale = isArabic ? const Locale('en', 'US') : const Locale('ar', 'SY');
-                  final notifier = ref.read(settingsProvider.notifier);
-                  final messenger = ScaffoldMessenger.of(context);
-                  await notifier.setLocale(newLocale);
-                  LocalizationService.instance.setLocale(newLocale);
-                  final newTextAlign =
-                      LocalizationService.instance.textDirection == TextDirection.rtl
-                          ? TextAlign.right
-                          : TextAlign.left;
-                  messenger
-                    ..hideCurrentSnackBar()
-                    ..showSnackBar(
-                      SnackBar(
-                        content: Text(
-                          LocalizationService.instance.getString('settingsSaved'),
-                          textAlign: newTextAlign,
+                  final selected = await LanguagePicker.show(
+                    context,
+                    settings.locale,
+                  );
+                  if (selected != null && selected != settings.locale) {
+                    await ref
+                        .read(settingsProvider.notifier)
+                        .setLocale(selected);
+                    final newAlign =
+                        LocalizationService.instance.textDirection ==
+                            TextDirection.rtl
+                        ? TextAlign.right
+                        : TextAlign.left;
+                    ScaffoldMessenger.of(context)
+                      ..hideCurrentSnackBar()
+                      ..showSnackBar(
+                        SnackBar(
+                          content: Text(
+                            LocalizationService.instance.getString(
+                              'settingsSaved',
+                            ),
+                            textAlign: newAlign,
+                          ),
                         ),
-                      ),
-                    );
+                      );
+                  }
                 },
               ),
               SwitchListTile(
                 secondary: const Icon(Icons.dark_mode),
-                title: Text(localization.getString('darkMode'), textAlign: textAlign),
+                title: Text(
+                  localization.getString('darkMode'),
+                  textAlign: textAlign,
+                ),
                 value: settings.themeMode == ThemeMode.dark,
                 onChanged: (value) => ref
                     .read(settingsProvider.notifier)
@@ -70,7 +86,10 @@ class SettingsScreen extends ConsumerWidget {
               ),
               SwitchListTile(
                 secondary: const Icon(Icons.notifications),
-                title: Text(localization.getString('notificationsEnabled'), textAlign: textAlign),
+                title: Text(
+                  localization.getString('notificationsEnabled'),
+                  textAlign: textAlign,
+                ),
                 value: settings.notificationsEnabled,
                 onChanged: (value) => ref
                     .read(settingsProvider.notifier)
@@ -79,19 +98,28 @@ class SettingsScreen extends ConsumerWidget {
               const Divider(),
               ListTile(
                 leading: const Icon(Icons.info),
-                title: Text(localization.getString('about'), textAlign: textAlign),
+                title: Text(
+                  localization.getString('about'),
+                  textAlign: textAlign,
+                ),
                 trailing: const Icon(Icons.arrow_forward_ios),
                 onTap: () => _showAbout(context),
               ),
               ListTile(
                 leading: const Icon(Icons.privacy_tip),
-                title: Text(localization.getString('privacyPolicy'), textAlign: textAlign),
+                title: Text(
+                  localization.getString('privacyPolicy'),
+                  textAlign: textAlign,
+                ),
                 trailing: const Icon(Icons.arrow_forward_ios),
                 onTap: () => context.push(AppRouter.privacy),
               ),
               ListTile(
                 leading: const Icon(Icons.description),
-                title: Text(localization.getString('termsOfService'), textAlign: textAlign),
+                title: Text(
+                  localization.getString('termsOfService'),
+                  textAlign: textAlign,
+                ),
                 trailing: const Icon(Icons.arrow_forward_ios),
                 onTap: () => context.push(AppRouter.terms),
               ),
@@ -104,19 +132,18 @@ class SettingsScreen extends ConsumerWidget {
 
   void _showAbout(BuildContext context) {
     final localization = LocalizationService.instance;
-    final textAlign =
-        localization.textDirection == TextDirection.rtl ? TextAlign.right : TextAlign.left;
+    final textAlign = localization.textDirection == TextDirection.rtl
+        ? TextAlign.right
+        : TextAlign.left;
 
     showAboutDialog(
       context: context,
       applicationName: localization.getString('appName'),
       applicationVersion: '1.0.0',
-      applicationLegalese: '© 2025 ${localization.getString('appName')}',
+      applicationLegalese:
+          'Copyright 2025 ${localization.getString('appName')}',
       children: [
-        Text(
-          localization.getString('aboutDescription'),
-          textAlign: textAlign,
-        ),
+        Text(localization.getString('aboutDescription'), textAlign: textAlign),
       ],
     );
   }
