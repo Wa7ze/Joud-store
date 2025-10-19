@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../utils/currency_utils.dart';
 import '../theme/design_tokens.dart';
 
 class RatingStars extends StatelessWidget {
@@ -28,8 +29,8 @@ class RatingStars extends StatelessWidget {
           isFull
               ? Icons.star
               : isHalf
-                  ? Icons.star_half
-                  : Icons.star_border,
+              ? Icons.star_half
+              : Icons.star_border,
           size: size,
           color: color ?? Colors.amber,
         );
@@ -65,7 +66,7 @@ class PriceWidget extends StatelessWidget {
       textBaseline: TextBaseline.alphabetic,
       children: [
         Text(
-          showCurrency ? '$price SYP' : price.toString(),
+          showCurrency ? CurrencyUtils.format(price) : price.toString(),
           style: (priceStyle ?? theme.textTheme.titleLarge)?.copyWith(
             color: hasDiscount ? DesignTokens.errorColor : null,
             fontWeight: DesignTokens.fontWeightBold,
@@ -74,11 +75,14 @@ class PriceWidget extends StatelessWidget {
         if (hasDiscount) ...[
           const SizedBox(width: DesignTokens.spacing2),
           Text(
-            showCurrency ? '$compareAtPrice SYP' : compareAtPrice.toString(),
-            style: (compareAtPriceStyle ?? theme.textTheme.bodyMedium)?.copyWith(
-              decoration: TextDecoration.lineThrough,
-              color: theme.disabledColor,
-            ),
+            showCurrency
+                ? CurrencyUtils.format(compareAtPrice!)
+                : compareAtPrice.toString(),
+            style: (compareAtPriceStyle ?? theme.textTheme.bodyMedium)
+                ?.copyWith(
+                  decoration: TextDecoration.lineThrough,
+                  color: theme.disabledColor,
+                ),
           ),
         ],
       ],

@@ -1,4 +1,4 @@
-/// Theme configuration for the app
+// Theme configuration for the app
 import 'package:flutter/material.dart';
 import 'app_colors.dart';
 
@@ -10,17 +10,17 @@ class AppTheme {
   static Color get errorColor => AppColors.error;
   static Color get warningColor => AppColors.warning;
   static Color get successColor => AppColors.success;
-  
+
   // Neutral colors
   static Color get surfaceColor => AppColors.surface;
   static Color get backgroundColor => AppColors.background;
   static Color get cardColor => AppColors.cardBackground;
-  
+
   // Text colors
   static Color get textPrimary => AppColors.textPrimary;
   static Color get textSecondary => AppColors.textSecondary;
   static Color get textHint => AppColors.textLight;
-  
+
   // Dark theme colors
   static const Color darkSurfaceColor = Color(0xFF121212);
   static const Color darkBackgroundColor = Color(0xFF000000);
@@ -28,7 +28,7 @@ class AppTheme {
   static Color get darkTextPrimary => Colors.white;
   static Color get darkTextSecondary => Colors.white70;
   static Color get darkTextHint => Colors.white54;
-  
+
   // Spacing
   static const double spacingXS = 4.0;
   static const double spacingS = 8.0;
@@ -36,28 +36,29 @@ class AppTheme {
   static const double spacingL = 24.0;
   static const double spacingXL = 32.0;
   static const double spacingXXL = 48.0;
-  
+
   // Border radius
   static const double radiusS = 4.0;
   static const double radiusM = 8.0;
   static const double radiusL = 12.0;
   static const double radiusXL = 16.0;
   static const double radiusXXL = 24.0;
-  
+
   // Elevation
   static const double elevationS = 2.0;
   static const double elevationM = 4.0;
   static const double elevationL = 8.0;
   static const double elevationXL = 16.0;
-  
+
   // Typography
   static const String fontFamily = 'Cairo'; // Arabic-friendly font
-  
+
   static ThemeData get lightTheme {
     return ThemeData(
       useMaterial3: true,
       fontFamily: fontFamily,
       colorScheme: AppColors.colorScheme,
+      scaffoldBackgroundColor: AppColors.background,
       textTheme: _buildTextTheme(Brightness.light),
       appBarTheme: AppBarTheme(
         elevation: 0,
@@ -110,7 +111,7 @@ class AppTheme {
       ),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
-        fillColor: AppColors.surfaceVariant,
+        fillColor: Colors.white,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(radiusM),
           borderSide: BorderSide(color: AppColors.outline),
@@ -143,12 +144,13 @@ class AppTheme {
       ),
     );
   }
-  
+
   static ThemeData get darkTheme {
     return ThemeData(
       useMaterial3: true,
       fontFamily: fontFamily,
       colorScheme: AppColors.darkColorScheme,
+      scaffoldBackgroundColor: darkBackgroundColor,
       textTheme: _buildTextTheme(Brightness.dark),
       appBarTheme: AppBarTheme(
         elevation: 0,
@@ -234,15 +236,15 @@ class AppTheme {
       ),
     );
   }
-  
+
   static TextTheme _buildTextTheme(Brightness brightness) {
-    final Color textColor = brightness == Brightness.light 
-        ? textPrimary 
+    final Color textColor = brightness == Brightness.light
+        ? textPrimary
         : darkTextPrimary;
-    final Color textSecondaryColor = brightness == Brightness.light 
-        ? textSecondary 
+    final Color textSecondaryColor = brightness == Brightness.light
+        ? textSecondary
         : darkTextSecondary;
-    
+
     return TextTheme(
       displayLarge: TextStyle(
         fontSize: 32,

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../core/localization/localization_service.dart';
+import '../../core/theme/app_colors.dart';
 import '../../core/widgets/ui_states.dart';
 import '../../core/router/app_router.dart';
 import 'providers/category_provider.dart';
@@ -15,15 +16,43 @@ class CategoriesScreen extends ConsumerStatefulWidget {
 }
 
 class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
-  String? _selectedCategory;
+  final ScrollController _scrollController = ScrollController();
+  bool _showScrollToTop = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _scrollController.addListener(_handleScroll);
+  }
+
+  @override
+  void dispose() {
+    _scrollController
+      ..removeListener(_handleScroll)
+      ..dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     final localizationService = LocalizationService.instance;
     final categoriesAsync = ref.watch(categoriesProvider);
-    
+
     return ScreenScaffold(
       title: localizationService.getString('categories'),
+      showBackButton: false,
+      currentIndex: 0,
+      showBottomNav: true,
+      centerContent: false,
+      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
+      floatingActionButton: _showScrollToTop
+          ? FloatingActionButton(
+              onPressed: _scrollToTop,
+              backgroundColor: AppColors.accent,
+              foregroundColor: Colors.white,
+              child: const Icon(Icons.arrow_upward),
+            )
+          : null,
       body: categoriesAsync.when(
         data: (categories) => _buildCategoriesGrid(categories),
         loading: () => const LoadingState(),
@@ -44,6 +73,7 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
     };
 
     return CustomScrollView(
+      controller: _scrollController,
       slivers: [
         // Featured Categories
         SliverToBoxAdapter(
@@ -79,7 +109,7 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
             ),
           ),
         ),
-        
+
         // Section Title
         SliverToBoxAdapter(
           child: Padding(
@@ -95,13 +125,10 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
         SliverPadding(
           padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
           sliver: SliverGrid(
-            delegate: SliverChildBuilderDelegate(
-              (context, index) {
-                final category = categories[index];
-                return _buildCategoryCard(context, category, iconMap);
-              },
-              childCount: categories.length,
-            ),
+            delegate: SliverChildBuilderDelegate((context, index) {
+              final category = categories[index];
+              return _buildCategoryCard(context, category, iconMap);
+            }, childCount: categories.length),
             gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: 2,
               childAspectRatio: 1.2,
@@ -113,7 +140,7 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
       ],
     );
   }
-  
+
   Widget _buildFeaturedCard(
     BuildContext context,
     Category category, {
@@ -131,8 +158,10 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
             color: Theme.of(context).colorScheme.primaryContainer,
             borderRadius: BorderRadius.circular(12),
             image: DecorationImage(
-              image: NetworkImage(category.image ?? 
-                'https://picsum.photos/200/300?random=${category.id}'),
+              image: NetworkImage(
+                category.image ??
+                    'https://picsum.photos/200/300?random=${category.id}',
+              ),
               fit: BoxFit.cover,
               colorFilter: ColorFilter.mode(
                 Colors.black.withOpacity(0.4),
@@ -174,9 +203,7 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
   ) {
     return Card(
       elevation: 1,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: InkWell(
         onTap: () => _showSubcategories(context, category),
         borderRadius: BorderRadius.circular(12),
@@ -255,7 +282,9 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
               padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
               decoration: BoxDecoration(
                 color: Theme.of(context).colorScheme.surface,
-                borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+                borderRadius: const BorderRadius.vertical(
+                  top: Radius.circular(20),
+                ),
                 boxShadow: [
                   BoxShadow(
                     color: Colors.black.withOpacity(0.05),
@@ -273,13 +302,15 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
                       width: 40,
                       height: 4,
                       decoration: BoxDecoration(
-                        color: Theme.of(context).colorScheme.outline.withOpacity(0.4),
+                        color: Theme.of(
+                          context,
+                        ).colorScheme.outline.withOpacity(0.4),
                         borderRadius: BorderRadius.circular(2),
                       ),
                     ),
                   ),
                   const SizedBox(height: 16),
-                  
+
                   // Title and stats
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -296,9 +327,12 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
                               const SizedBox(height: 4),
                               Text(
                                 category.description!,
-                                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                  color: Theme.of(context).colorScheme.onSurfaceVariant,
-                                ),
+                                style: Theme.of(context).textTheme.bodyMedium
+                                    ?.copyWith(
+                                      color: Theme.of(
+                                        context,
+                                      ).colorScheme.onSurfaceVariant,
+                                    ),
                               ),
                             ],
                           ],
@@ -315,10 +349,11 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
                         ),
                         child: Text(
                           '${category.productCount} منتج',
-                          style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                            color: Theme.of(context).colorScheme.primary,
-                            fontWeight: FontWeight.bold,
-                          ),
+                          style: Theme.of(context).textTheme.labelMedium
+                              ?.copyWith(
+                                color: Theme.of(context).colorScheme.primary,
+                                fontWeight: FontWeight.bold,
+                              ),
                         ),
                       ),
                     ],
@@ -326,7 +361,7 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
                 ],
               ),
             ),
-            
+
             // Subcategories grid
             Expanded(
               child: GridView.builder(
@@ -338,7 +373,8 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
                   crossAxisSpacing: 12,
                   mainAxisSpacing: 12,
                 ),
-                itemCount: category.subcategories.length + 1, // +1 for "View All"
+                itemCount:
+                    category.subcategories.length + 1, // +1 for "View All"
                 itemBuilder: (context, index) {
                   if (index == category.subcategories.length) {
                     return _buildSubcategoryCard(
@@ -347,12 +383,14 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
                       icon: Icons.grid_view_rounded,
                       onTap: () {
                         Navigator.pop(context);
-                        context.go('${AppRouter.productList}?categoryId=${category.id}');
+                        context.go(
+                          '${AppRouter.productList}?categoryId=${category.id}',
+                        );
                       },
                       isViewAll: true,
                     );
                   }
-                  
+
                   final subcategory = category.subcategories[index];
                   return _buildSubcategoryCard(
                     context,
@@ -360,16 +398,18 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
                     icon: Icons.category_outlined,
                     onTap: () {
                       Navigator.pop(context);
-                      context.go('${AppRouter.productList}?categoryId=${category.id}&subcategory=$subcategory');
+                      context.go(
+                        '${AppRouter.productList}?categoryId=${category.id}&subcategory=$subcategory',
+                      );
                     },
                   );
                 },
               ),
             ),
-            ],
-          ),
+          ],
         ),
-      );
+      ),
+    );
   }
 
   Widget _buildSubcategoryCard(
@@ -425,5 +465,26 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
         ),
       ),
     );
+  }
+
+  void _handleScroll() {
+    if (!_scrollController.hasClients ||
+        !_scrollController.position.hasContentDimensions)
+      return;
+    final maxExtent = _scrollController.position.maxScrollExtent;
+    final shouldShow =
+        maxExtent > 0 && _scrollController.offset >= maxExtent * 0.5;
+    if (shouldShow != _showScrollToTop) {
+      setState(() => _showScrollToTop = shouldShow);
+    }
+  }
+
+  void _scrollToTop() {
+    _scrollController.animateTo(
+      0,
+      duration: const Duration(milliseconds: 500),
+      curve: Curves.easeOutCubic,
+    );
+    setState(() => _showScrollToTop = false);
   }
 }

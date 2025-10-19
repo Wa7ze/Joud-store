@@ -78,6 +78,7 @@ class TrendingSearchesNotifier extends AsyncNotifier<List<String>> {
   @override
   Future<List<String>> build() async {
     final searchService = ref.read(searchServiceProvider);
+    // Use static Arabic top-10 list
     return searchService.getTrendingSearches();
   }
 }

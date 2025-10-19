@@ -1,408 +1,302 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import '../../core/localization/localization_service.dart';
-import '../../core/widgets/ui_states.dart';
-import '../../core/router/app_router.dart';
-import '../../core/config/app_config.dart';
 
-class CartScreen extends ConsumerStatefulWidget {
+import '../../core/localization/localization_service.dart';
+import '../../core/router/app_router.dart';
+import '../../core/utils/currency_utils.dart';
+import '../../core/widgets/page_container.dart';
+import '../../core/widgets/product_card.dart';
+import '../../core/widgets/ui_states.dart';
+import '../products/models/product.dart';
+import '../products/services/product_service.dart';
+
+class CartScreen extends StatefulWidget {
   const CartScreen({super.key});
 
   @override
-  ConsumerState<CartScreen> createState() => _CartScreenState();
+  State<CartScreen> createState() => _CartScreenState();
 }
 
-class _CartScreenState extends ConsumerState<CartScreen> {
-  bool _isLoading = false;
-  List<CartItem> _cartItems = [];
-  String? _appliedCoupon;
-  double _deliveryFee = 0;
+class _CartScreenState extends State<CartScreen>
+    with SingleTickerProviderStateMixin {
+  late Future<List<Product>> _cartProductsFuture;
 
   @override
   void initState() {
     super.initState();
-    _loadCartItems();
+    _cartProductsFuture = ProductService().getProducts(
+      categoryId: 'men',
+      pageSize: 2,
+      sortBy: 'latest',
+    );
   }
 
-  void _loadCartItems() {
-    // Mock cart items
-    _cartItems = [
-      CartItem(
-        id: '1',
-        productId: 'product_1',
-        productName: 'منتج 1',
-        price: 50000,
-        originalPrice: 75000,
-        quantity: 2,
-        imageUrl: '',
-        selectedSize: 'M',
-        selectedColor: 'أحمر',
-      ),
-      CartItem(
-        id: '2',
-        productId: 'product_2',
-        productName: 'منتج 2',
-        price: 30000,
-        originalPrice: 30000,
-        quantity: 1,
-        imageUrl: '',
-        selectedSize: 'L',
-        selectedColor: 'أزرق',
-      ),
-    ];
-    _calculateDeliveryFee();
-  }
+  Future<void> _handleCheckout() async {
+    final localization = LocalizationService.instance;
+    final overlayState = Overlay.of(context);
 
-  void _calculateDeliveryFee() {
-    // Mock delivery fee calculation
-    _deliveryFee = AppConfig.deliveryFees['damascus'] ?? 5000;
+    final controller = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 2),
+    );
+
+    final overlayEntry = OverlayEntry(
+      builder: (context) => _CheckoutOverlay(
+        controller: controller,
+        processingLabel: localization.getString('cartProcessingOrder'),
+      ),
+    );
+
+    overlayState.insert(overlayEntry);
+    await controller.forward();
+    overlayEntry.remove();
+    controller.dispose();
+
+    if (!mounted) return;
+    showDialog<void>(
+      context: context,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(Icons.local_shipping, color: Colors.green, size: 40),
+            const SizedBox(height: 12),
+            Text(
+              localization.getString('cartOnTheWayTitle'),
+              style: const TextStyle(fontWeight: FontWeight.w700),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: Text(localization.getString('cartAwesomeButton')),
+          ),
+        ],
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    final localizationService = LocalizationService.instance;
-    
+    final localization = LocalizationService.instance;
     return ScreenScaffold(
-      title: localizationService.getString('cart'),
-      body: _isLoading
-          ? const LoadingState()
-          : _cartItems.isEmpty
-              ? EmptyState(
-                  title: localizationService.getString('emptyCart'),
-                  message: 'أضف منتجات إلى سلة التسوق لبدء التسوق',
-                  icon: Icons.shopping_cart_outlined,
-                )
-              : Column(
-                  children: [
-                    // Cart Items
-                    Expanded(
-                      child: ListView.builder(
-                        padding: const EdgeInsets.all(16),
-                        itemCount: _cartItems.length,
-                        itemBuilder: (context, index) {
-                          return _buildCartItem(_cartItems[index]);
-                        },
-                      ),
-                    ),
-                    
-                    // Cart Summary
-                    _buildCartSummary(),
-                  ],
-                ),
-    );
-  }
+      showBackButton: false,
+      currentIndex: 2,
+      centerContent: false,
+      contentPadding: EdgeInsets.zero,
+      body: FutureBuilder<List<Product>>(
+        future: _cartProductsFuture,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState != ConnectionState.done) {
+            return const LoadingState();
+          }
 
-  Widget _buildCartItem(CartItem item) {
-    return Card(
-      margin: const EdgeInsets.only(bottom: 12),
-      child: Padding(
-        padding: const EdgeInsets.all(12),
-        child: Row(
-          children: [
-            // Product Image
-            Container(
-              width: 80,
-              height: 80,
-              decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.surfaceVariant,
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: const Center(
-                child: Icon(Icons.image, size: 30),
-              ),
-            ),
-            
-            const SizedBox(width: 12),
-            
-            // Product Info
-            Expanded(
+          if (snapshot.hasError) {
+            return PageContainer(
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Text(
-                    item.productName,
-                    style: Theme.of(context).textTheme.titleMedium,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
+                  EmptyState(
+                    title: localization.getString('cartUnavailableTitle'),
+                    message: localization.getString('cartUnavailableMessage'),
+                    icon: Icons.shopping_cart_outlined,
                   ),
-                  const SizedBox(height: 4),
-                  
-                  // Variants
-                  if (item.selectedSize != null || item.selectedColor != null) ...[
-                    Text(
-                      '${item.selectedSize ?? ''} ${item.selectedColor ?? ''}',
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: Theme.of(context).colorScheme.onSurfaceVariant,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                  ],
-                  
-                  // Price
-                  Row(
-                    children: [
-                      Text(
-                        '${AppConfig.defaultCurrency} ${item.price.toStringAsFixed(0)}',
-                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: Theme.of(context).colorScheme.primary,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      if (item.originalPrice > item.price) ...[
-                        const SizedBox(width: 8),
-                        Text(
-                          '${AppConfig.defaultCurrency} ${item.originalPrice.toStringAsFixed(0)}',
-                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            decoration: TextDecoration.lineThrough,
-                            color: Theme.of(context).colorScheme.onSurfaceVariant,
-                          ),
-                        ),
-                      ],
-                    ],
+                  const SizedBox(height: 16),
+                  FilledButton(
+                    onPressed: () {
+                      setState(() {
+                        _cartProductsFuture = ProductService().getProducts(
+                          categoryId: 'men',
+                          pageSize: 2,
+                          sortBy: 'latest',
+                        );
+                      });
+                    },
+                    child: Text(localization.getString('retry')),
                   ),
                 ],
               ),
-            ),
-            
-            // Quantity Controls
-            Column(
+            );
+          }
+
+          final products = snapshot.data ?? const <Product>[];
+          if (products.isEmpty) {
+            return PageContainer(
+              child: EmptyState(
+                title: localization.getString('cartEmptyTitle'),
+                message: localization.getString('cartEmptyMessage'),
+                icon: Icons.shopping_cart_outlined,
+              ),
+            );
+          }
+
+          final totalCost = products.fold<double>(
+            0,
+            (sum, item) => sum + item.price,
+          );
+
+          return PageContainer(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            child: Column(
               children: [
-                IconButton(
-                  icon: const Icon(Icons.remove),
-                  onPressed: item.quantity > 1 ? () => _updateQuantity(item.id, item.quantity - 1) : null,
-                ),
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-                  decoration: BoxDecoration(
-                    border: Border.all(color: Theme.of(context).colorScheme.outline),
-                    borderRadius: BorderRadius.circular(4),
+                Expanded(
+                  child: GridView.builder(
+                    physics: const BouncingScrollPhysics(),
+                    gridDelegate:
+                        const SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: 2,
+                          crossAxisSpacing: 16,
+                          mainAxisSpacing: 16,
+                          childAspectRatio: 0.68,
+                        ),
+                    itemCount: products.length,
+                    itemBuilder: (context, index) => ProductCard(
+                      product: products[index],
+                      onTap: () => context.push(
+                        '${AppRouter.productDetail}/${products[index].id}',
+                      ),
+                    ),
                   ),
-                  child: Text(item.quantity.toString()),
                 ),
-                IconButton(
-                  icon: const Icon(Icons.add),
-                  onPressed: () => _updateQuantity(item.id, item.quantity + 1),
+                const SizedBox(height: 20),
+                Card(
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  elevation: 0,
+                  child: Padding(
+                    padding: const EdgeInsets.all(20),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(localization.getString('total')),
+                            Text(
+                              CurrencyUtils.format(totalCost),
+                              style: Theme.of(context).textTheme.titleMedium
+                                  ?.copyWith(fontWeight: FontWeight.bold),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 12),
+                        FilledButton(
+                          onPressed: _handleCheckout,
+                          style: FilledButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(vertical: 16),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(16),
+                            ),
+                          ),
+                          child: Text(localization.getString('checkout')),
+                        ),
+                      ],
+                    ),
+                  ),
                 ),
               ],
             ),
-            
-            // Remove Button
-            IconButton(
-              icon: const Icon(Icons.delete_outline),
-              onPressed: () => _removeItem(item.id),
-            ),
-          ],
-        ),
+          );
+        },
       ),
     );
   }
+}
 
-  Widget _buildCartSummary() {
-    final localizationService = LocalizationService.instance;
-    final subtotal = _cartItems.fold<double>(
-      0,
-      (sum, item) => sum + (item.price * item.quantity),
+class _CheckoutOverlay extends StatelessWidget {
+  const _CheckoutOverlay({
+    required this.controller,
+    required this.processingLabel,
+  });
+
+  final AnimationController controller;
+  final String processingLabel;
+
+  @override
+  Widget build(BuildContext context) {
+    final animation = CurvedAnimation(
+      parent: controller,
+      curve: Curves.easeInOut,
     );
-    final discount = _appliedCoupon != null ? subtotal * 0.1 : 0; // 10% discount
-    final total = subtotal - discount + _deliveryFee;
-    
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surface,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.1),
-            blurRadius: 4,
-            offset: const Offset(0, -2),
-          ),
-        ],
-      ),
-      child: Column(
-        children: [
-          // Coupon Section
-          Row(
+
+    return IgnorePointer(
+      child: AnimatedBuilder(
+        animation: animation,
+        builder: (context, _) {
+          final progress = animation.value;
+          final size = MediaQuery.of(context).size;
+          final circleSize = 100 + (progress * 60);
+          final checkOpacity = progress.clamp(0.6, 1.0);
+
+          return Stack(
             children: [
-              Expanded(
-                child: TextField(
-                  decoration: InputDecoration(
-                    hintText: localizationService.getString('couponCode'),
-                    border: const OutlineInputBorder(),
-                    contentPadding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 8,
+              Opacity(
+                opacity: progress * 0.6,
+                child: Container(color: Colors.black),
+              ),
+              Center(
+                child: Container(
+                  width: circleSize,
+                  height: circleSize,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: Colors.white.withValues(alpha: 0.9),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.2),
+                        blurRadius: 20,
+                      ),
+                    ],
+                  ),
+                  child: Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      SizedBox(
+                        width: circleSize - 24,
+                        height: circleSize - 24,
+                        child: CircularProgressIndicator(
+                          value: progress,
+                          strokeWidth: 6,
+                          valueColor: AlwaysStoppedAnimation<Color>(
+                            Theme.of(context).colorScheme.primary,
+                          ),
+                        ),
+                      ),
+                      Opacity(
+                        opacity: checkOpacity,
+                        child: Icon(
+                          Icons.check_circle,
+                          color: Theme.of(context).colorScheme.primary,
+                          size: circleSize / 2,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              Positioned(
+                bottom: size.height * 0.25,
+                left: 0,
+                right: 0,
+                child: Opacity(
+                  opacity: progress,
+                  child: Text(
+                    processingLabel,
+                    textAlign: TextAlign.center,
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
                     ),
                   ),
                 ),
               ),
-              const SizedBox(width: 8),
-              ElevatedButton(
-                onPressed: _applyCoupon,
-                child: Text(localizationService.getString('applyCoupon')),
-              ),
             ],
-          ),
-          
-          const SizedBox(height: 16),
-          
-          // Summary
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(localizationService.getString('subtotal')),
-              Text('${AppConfig.defaultCurrency} ${subtotal.toStringAsFixed(0)}'),
-            ],
-          ),
-          
-          if (_appliedCoupon != null) ...[
-            const SizedBox(height: 4),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(localizationService.getString('discount')),
-                Text(
-                  '-${AppConfig.defaultCurrency} ${discount.toStringAsFixed(0)}',
-                  style: TextStyle(color: Theme.of(context).colorScheme.error),
-                ),
-              ],
-            ),
-          ],
-          
-          const SizedBox(height: 4),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(localizationService.getString('delivery')),
-              Text('${AppConfig.defaultCurrency} ${_deliveryFee.toStringAsFixed(0)}'),
-            ],
-          ),
-          
-          const Divider(),
-          
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                localizationService.getString('total'),
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              Text(
-                '${AppConfig.defaultCurrency} ${total.toStringAsFixed(0)}',
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  color: Theme.of(context).colorScheme.primary,
-                ),
-              ),
-            ],
-          ),
-          
-          const SizedBox(height: 16),
-          
-          // Checkout Button
-          SizedBox(
-            width: double.infinity,
-            child: ElevatedButton(
-              onPressed: _cartItems.isNotEmpty ? _proceedToCheckout : null,
-              child: Text(localizationService.getString('checkout')),
-            ),
-          ),
-        ],
+          );
+        },
       ),
-    );
-  }
-
-  void _updateQuantity(String itemId, int newQuantity) {
-    setState(() {
-      final itemIndex = _cartItems.indexWhere((item) => item.id == itemId);
-      if (itemIndex != -1) {
-        _cartItems[itemIndex] = _cartItems[itemIndex].copyWith(quantity: newQuantity);
-      }
-    });
-  }
-
-  void _removeItem(String itemId) {
-    setState(() {
-      _cartItems.removeWhere((item) => item.id == itemId);
-    });
-    
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(LocalizationService.instance.getString('productRemovedFromCart')),
-        action: SnackBarAction(
-          label: LocalizationService.instance.getString('undo'),
-          onPressed: () {
-            // Undo remove (would need to restore the item)
-          },
-        ),
-      ),
-    );
-  }
-
-  void _applyCoupon() {
-    // Mock coupon application
-    setState(() {
-      _appliedCoupon = 'SAVE10';
-    });
-    
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(LocalizationService.instance.getString('couponApplied')),
-      ),
-    );
-  }
-
-  void _proceedToCheckout() {
-    context.go(AppRouter.checkout);
-  }
-}
-
-class CartItem {
-  final String id;
-  final String productId;
-  final String productName;
-  final double price;
-  final double originalPrice;
-  final int quantity;
-  final String imageUrl;
-  final String? selectedSize;
-  final String? selectedColor;
-
-  CartItem({
-    required this.id,
-    required this.productId,
-    required this.productName,
-    required this.price,
-    required this.originalPrice,
-    required this.quantity,
-    required this.imageUrl,
-    this.selectedSize,
-    this.selectedColor,
-  });
-
-  CartItem copyWith({
-    String? id,
-    String? productId,
-    String? productName,
-    double? price,
-    double? originalPrice,
-    int? quantity,
-    String? imageUrl,
-    String? selectedSize,
-    String? selectedColor,
-  }) {
-    return CartItem(
-      id: id ?? this.id,
-      productId: productId ?? this.productId,
-      productName: productName ?? this.productName,
-      price: price ?? this.price,
-      originalPrice: originalPrice ?? this.originalPrice,
-      quantity: quantity ?? this.quantity,
-      imageUrl: imageUrl ?? this.imageUrl,
-      selectedSize: selectedSize ?? this.selectedSize,
-      selectedColor: selectedColor ?? this.selectedColor,
     );
   }
 }

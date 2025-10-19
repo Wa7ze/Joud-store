@@ -1,136 +1,159 @@
 import 'package:flutter/material.dart';
-import '../theme/design_tokens.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
-class ProductCard extends StatelessWidget {
-  final String title;
-  final String imageUrl;
-  final double price;
-  final double? compareAtPrice;
+import '../../features/products/models/product.dart';
+import '../../features/products/providers/favorites_provider.dart';
+import '../../core/router/app_router.dart';
+import '../../core/utils/currency_utils.dart';
+
+class ProductCard extends ConsumerWidget {
+  const ProductCard({super.key, required this.product, this.onTap});
+
+  final Product product;
   final VoidCallback? onTap;
-  final bool isInStock;
-
-  const ProductCard({
-    Key? key,
-    required this.title,
-    required this.imageUrl,
-    required this.price,
-    this.compareAtPrice,
-    this.onTap,
-    this.isInStock = true,
-  }) : super(key: key);
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
-    final hasDiscount = compareAtPrice != null && compareAtPrice! > price;
+    final favorites = ref.watch(favoritesProvider);
+    final isFavorite = favorites.contains(product.id);
+    final hasDiscount =
+        product.originalPrice != null && product.originalPrice! > product.price;
+    final VoidCallback effectiveOnTap =
+        onTap ?? () => context.push('${AppRouter.productDetail}/${product.id}');
 
     return GestureDetector(
-      onTap: onTap,
+      onTap: effectiveOnTap,
       child: Container(
         decoration: BoxDecoration(
-          color: theme.cardColor,
-          borderRadius: BorderRadius.circular(DesignTokens.radiusMedium),
-          boxShadow: DesignTokens.shadowSmall,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: Colors.grey.shade300),
         ),
+        clipBehavior: Clip.hardEdge,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Product Image with Discount Badge
-            Stack(
-              children: [
-                ClipRRect(
-                  borderRadius: const BorderRadius.vertical(
-                    top: Radius.circular(DesignTokens.radiusMedium),
-                  ),
-                  child: AspectRatio(
-                    aspectRatio: 1,
-                    child: Image.network(
-                      imageUrl,
-                      fit: BoxFit.cover,
-                      errorBuilder: (context, error, stackTrace) {
-                        return Container(
-                          color: theme.disabledColor.withOpacity(0.1),
-                          child: const Icon(Icons.image_not_supported),
-                        );
-                      },
-                    ),
-                  ),
-                ),
-                if (hasDiscount)
-                  Positioned(
-                    top: DesignTokens.spacing2,
-                    right: DesignTokens.spacing2,
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: DesignTokens.spacing2,
-                        vertical: DesignTokens.spacing1,
-                      ),
-                      decoration: BoxDecoration(
-                        color: DesignTokens.errorColor,
-                        borderRadius: BorderRadius.circular(DesignTokens.radiusSmall),
-                      ),
-                      child: Text(
-                        '-${((compareAtPrice! - price) / compareAtPrice! * 100).round()}%',
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 12,
-                          fontWeight: DesignTokens.fontWeightBold,
-                        ),
-                      ),
-                    ),
-                  ),
-              ],
-            ),
-            // Product Info
-            Padding(
-              padding: const EdgeInsets.all(DesignTokens.spacing3),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+            Expanded(
+              child: Stack(
                 children: [
-                  Text(
-                    title,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    style: theme.textTheme.titleMedium,
+                  Positioned.fill(
+                    child: product.images.isNotEmpty
+                        ? Image.network(
+                            product.images.first,
+                            fit: BoxFit.cover,
+                            errorBuilder: (_, __, ___) => _placeholder(),
+                          )
+                        : _placeholder(),
                   ),
-                  const SizedBox(height: DesignTokens.spacing2),
-                  Row(
-                    children: [
-                      Text(
-                        '$price SYP',
-                        style: theme.textTheme.titleLarge?.copyWith(
-                          color: DesignTokens.primaryColor,
-                          fontWeight: DesignTokens.fontWeightBold,
-                        ),
+                  Positioned(
+                    top: 8,
+                    left: 8,
+                    child: CircleAvatar(
+                      radius: 18,
+                      backgroundColor: Colors.black.withValues(
+                        alpha: isFavorite ? 0.45 : 0.35,
                       ),
-                      if (hasDiscount) ...[
-                        const SizedBox(width: DesignTokens.spacing2),
-                        Text(
-                          '$compareAtPrice SYP',
-                          style: theme.textTheme.bodyMedium?.copyWith(
-                            decoration: TextDecoration.lineThrough,
-                            color: theme.disabledColor,
+                      child: IconButton(
+                        icon: Icon(
+                          isFavorite ? Icons.favorite : Icons.favorite_border,
+                          color: Colors.white,
+                          size: 18,
+                        ),
+                        padding: EdgeInsets.zero,
+                        onPressed: () => ref
+                            .read(favoritesProvider.notifier)
+                            .toggleFavorite(product.id),
+                      ),
+                    ),
+                  ),
+                  if (!product.isInStock)
+                    Positioned.fill(
+                      child: Container(
+                        color: Colors.black.withValues(alpha: 0.4),
+                        alignment: Alignment.center,
+                        child: Text(
+                          'Sold Out',
+                          style: theme.textTheme.titleMedium?.copyWith(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
                           ),
                         ),
-                      ],
-                    ],
-                  ),
-                  if (!isInStock)
-                    Padding(
-                      padding: const EdgeInsets.only(top: DesignTokens.spacing2),
-                      child: Text(
-                        'Out of Stock',
-                        style: theme.textTheme.bodySmall?.copyWith(
-                          color: DesignTokens.errorColor,
+                      ),
+                    ),
+                  if (hasDiscount)
+                    Positioned(
+                      top: 8,
+                      right: 8,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 4,
+                        ),
+                        decoration: BoxDecoration(
+                          color: theme.colorScheme.error,
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Text(
+                          '-${((1 - product.price / product.originalPrice!) * 100).round()}%',
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ),
                     ),
                 ],
               ),
             ),
+            Padding(
+              padding: const EdgeInsets.all(8),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    product.name,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: theme.textTheme.bodyLarge?.copyWith(
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Row(
+                    children: [
+                      Text(
+                        CurrencyUtils.format(product.price),
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          color: theme.colorScheme.primary,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      if (hasDiscount) ...[
+                        const SizedBox(width: 6),
+                        Text(
+                          CurrencyUtils.format(product.originalPrice!),
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            decoration: TextDecoration.lineThrough,
+                            color: Colors.grey,
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
+                ],
+              ),
+            ),
           ],
         ),
       ),
+    );
+  }
+
+  Widget _placeholder() {
+    return Container(
+      color: Colors.grey.shade200,
+      child: const Icon(Icons.image_not_supported, color: Colors.grey),
     );
   }
 }

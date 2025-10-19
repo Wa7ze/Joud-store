@@ -1,7 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../models/order.dart' show CartItem;
 import '../models/product.dart';
-import '../models/order.dart';
-import '../models/coupon.dart';
 import '../services/mock_data_service.dart';
 
 class CartState {
